@@ -10,6 +10,8 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow server-to-server or curl/postman requests with no origin header.
     if (!origin) return callback(null, true);
+    // Allow file:// opened frontend pages (Origin: null) in local development.
+    if (origin === 'null') return callback(null, true);
 
     const allowedExact = new Set([
       "https://foodbridge-tau.vercel.app",

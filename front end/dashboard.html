@@ -1088,13 +1088,25 @@
     const fromGlobal = window.FOODBRIDGE_API_URL;
     const fromStorage = localStorage.getItem('foodbridge_api_url');
     const host = window.location.hostname || 'localhost';
-    const isLocal = host === 'localhost' || host === '127.0.0.1';
+    const isLocal = /^(127\.0\.0\.1|localhost|0\.0\.0\.0|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})$/.test(host) || window.location.protocol === 'file:';
     const fallback = isLocal ? `http://${host}:5001/api` : 'https://foodbridge-backend.onrender.com/api';
-
+    if (isLocal) return normalizeApiUrl(fromGlobal || fromQuery || fallback);
     return normalizeApiUrl(fromGlobal || fromStorage || fallback);
   }
 
   const API_URL = resolveApiBaseUrl();
+  const API_DEBUG_BADGE_ID = 'apiDebugBadge';
+
+  function renderApiBadge() {
+    let badge = document.getElementById(API_DEBUG_BADGE_ID);
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.id = API_DEBUG_BADGE_ID;
+      badge.style.cssText = 'position:fixed;right:14px;bottom:14px;background:#ffffff;border:1px solid #d7dccf;color:#1e2a22;padding:8px 10px;border-radius:10px;font-size:11px;z-index:3000;box-shadow:0 8px 20px rgba(0,0,0,0.08);';
+      document.body.appendChild(badge);
+    }
+    badge.textContent = `API: ${API_URL}`;
+  }
 
   window.addEventListener('load', () => {
     const token = localStorage.getItem('token');
@@ -1132,6 +1144,7 @@
     if (!isNGO) loadMyPosts();
     autoRemoveExpiredFood();
     setInterval(autoRemoveExpiredFood, 60000); // Check every minute
+    renderApiBadge();
   });
 
   function switchTab(tab, elem) {
