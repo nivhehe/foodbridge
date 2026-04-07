@@ -651,8 +651,8 @@
   const registerForm = document.getElementById('registerForm');
   const messageDiv = document.getElementById('message');
   const tabs = document.querySelectorAll('.tab');
-  const API_HOST = window.location.hostname || 'localhost';
-  const API_BASE_URL = `http://${API_HOST}:5001/api`;
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
+  
 
   function showForm(formType, tabEl) {
     tabs.forEach(tab => tab.classList.remove('active'));
@@ -706,7 +706,7 @@
         showMessage(data.message || '✗ Login failed', 'error');
       }
     } catch (err) {
-      showMessage(`✗ Unable to reach the server at ${API_HOST}:5001. Please make sure the backend is running.`, 'error');
+      showMessage(`✗ Unable to reach the server at ${API_BASE_URL}. Please try again later.`, 'error');
     }
   });
 
@@ -741,7 +741,7 @@
         showMessage(data.message || '✗ Registration failed', 'error');
       }
     } catch (err) {
-      showMessage(`✗ Unable to reach the server at ${API_HOST}:5001. Please make sure the backend is running.`, 'error');
+      showMessage(`✗ Unable to reach the server at ${API_BASE_URL}. Please try again later.`, 'error');
     }
   });
 

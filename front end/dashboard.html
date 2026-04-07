@@ -1077,8 +1077,8 @@
 </div>
 
 <script>
-  const API_HOST = window.location.hostname || 'localhost';
-  const API_URL = `http://${API_HOST}:5001/api`;
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.VITE_API_URL;
 
   window.addEventListener('load', () => {
     const token = localStorage.getItem('token');
@@ -1206,7 +1206,7 @@
         showMsg('✗ Failed to update profile', 'error', 'profileMsg');
       }
     } catch (err) {
-      showMsg(`✗ Unable to reach the server at ${API_HOST}:5001`, 'error', 'profileMsg');
+     showMsg(`✗ Unable to reach the server at ${API_URL}`, 'error', 'profileMsg');
     }
   });
 
@@ -1251,7 +1251,7 @@
         showMsg(`✗ ${result.message || 'Failed to post'}`, 'error', 'postMsg');
       }
     } catch (err) {
-      showMsg(`✗ Unable to reach the server at ${API_HOST}:5001`, 'error', 'postMsg');
+      showMsg(`✗ Unable to reach the server at ${API_URL}`, 'error', 'postMsg');
     }
   });
 
@@ -1350,7 +1350,7 @@
         showMsg(`✗ ${result.message || 'Failed to delete food post'}`, 'error', 'myPostsMsg');
       }
     } catch (err) {
-      showMsg(`✗ Unable to reach the server at ${API_HOST}:5001`, 'error', 'myPostsMsg');
+     showMsg(`✗ Unable to reach the server at ${API_URL}`, 'error', 'myPostsMsg');
     }
   }
 
