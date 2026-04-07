@@ -1089,7 +1089,7 @@
     const fromStorage = localStorage.getItem('foodbridge_api_url');
     const host = window.location.hostname || 'localhost';
     const isLocal = /^(127\.0\.0\.1|localhost|0\.0\.0\.0|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})$/.test(host) || window.location.protocol === 'file:';
-    const fallback = isLocal ? `http://${host}:5001/api` : 'https://foodbridge-backend.onrender.com/api';
+    const fallback = isLocal ? `http://${host}:5001/api` : 'https://foodbridge-gloo.onrender.com/api';
     if (isLocal) return normalizeApiUrl(fromGlobal || fromQuery || fallback);
     return normalizeApiUrl(fromGlobal || fromStorage || fallback);
   }
