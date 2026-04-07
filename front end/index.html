@@ -690,7 +690,7 @@
     return [...new Set(candidates)];
   }
 
-  async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+  async function fetchWithTimeout(url, options = {}, timeoutMs = 45000) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
     try {
@@ -720,6 +720,7 @@
       }
     }
 
+    console.error('API candidates tried:', candidates, 'lastError:', lastError);
     if (lastError) throw lastError;
     throw new Error('No reachable API endpoint');
   }
