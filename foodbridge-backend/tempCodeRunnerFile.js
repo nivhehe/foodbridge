@@ -4,37 +4,51 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 
 const app = express();
-app.use(cors());
+
+// ✅ Middleware
+app.use(cors({
+  origin: "https://foodbridge-tau.vercel.app", // your frontend
+}));
 app.use(express.json());
 
-// MongoDB connection (Atlas)
-mongoose.set('strictQuery', true);
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB connected successfully'))
-.catch(err => console.error('MongoDB connection error:', err));
+// ✅ Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/food', require('./routes/food'));
+app.use('/api/orders', require('./routes/Orders'));
 
-// Auth (login/OTP) routes
-const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
-
-// User profile/details routes
-const userRoutes = require('./routes/users');
-app.use('/api/users', userRoutes);
-
-// Food posting/listing routes
-const foodRoutes = require('./routes/food');
-app.use('/api/food', foodRoutes);
-
-// Order creation/listing routes
-const orderRoutes = require('./routes/Orders');
-app.use('/api/orders', orderRoutes);
-
-// Optional root health check
+// ✅ Test Route
 app.get('/', (req, res) => {
-  res.send('FoodBridge backend is running!');
+  res.send('FoodBridge backend is running 🚀');
 });
 
-app.listen(5001, () => console.log('Server running on port 5001'));
+// ✅ ENV variables
+const PORT = process.env.PORT || 5001;
+const MONGO_URI = process.env.MONGODB_URI;
+
+// ❌ Stop if missing
+if (!MONGO_URI) {
+  console.error("❌ MONGODB_URI is missing");
+  process.exit(1);
+}
+
+// ✅ Fix mongoose warning
+mongoose.set('strictQuery', false);
+
+// ✅ Start Server after DB connects
+const startServer = async () => {
+  try {
+    await mongoose.connect(MONGO_URI);
+    console.log('✅ MongoDB connected successfully');
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err);
+    process.exit(1);
+  }
+};
+
+startServer();
