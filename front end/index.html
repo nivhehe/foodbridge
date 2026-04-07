@@ -651,8 +651,25 @@
   const registerForm = document.getElementById('registerForm');
   const messageDiv = document.getElementById('message');
   const tabs = document.querySelectorAll('.tab');
-  const API_BASE_URL = import.meta.env.VITE_API_URL;
   
+  function normalizeApiUrl(url) {
+    return String(url || '').trim().replace(/\/+$/, '');
+  }
+
+  function resolveApiBaseUrl() {
+    const fromQuery = new URLSearchParams(window.location.search).get('api');
+    if (fromQuery) localStorage.setItem('foodbridge_api_url', normalizeApiUrl(fromQuery));
+
+    const fromGlobal = window.FOODBRIDGE_API_URL;
+    const fromStorage = localStorage.getItem('foodbridge_api_url');
+    const host = window.location.hostname || 'localhost';
+    const isLocal = host === 'localhost' || host === '127.0.0.1';
+    const fallback = isLocal ? `http://${host}:5001/api` : 'https://foodbridge-backend.onrender.com/api';
+
+    return normalizeApiUrl(fromGlobal || fromStorage || fallback);
+  }
+
+  const API_BASE_URL = resolveApiBaseUrl();
 
   function showForm(formType, tabEl) {
     tabs.forEach(tab => tab.classList.remove('active'));
@@ -706,7 +723,7 @@
         showMessage(data.message || '✗ Login failed', 'error');
       }
     } catch (err) {
-      showMessage(`✗ Unable to reach the server at ${API_BASE_URL}. Please try again later.`, 'error');
+      showMessage(`✗ Unable to reach the server at ${API_BASE_URL}. Please check backend URL/deployment.`, 'error');
     }
   });
 
@@ -741,7 +758,7 @@
         showMessage(data.message || '✗ Registration failed', 'error');
       }
     } catch (err) {
-      showMessage(`✗ Unable to reach the server at ${API_BASE_URL}. Please try again later.`, 'error');
+      showMessage(`✗ Unable to reach the server at ${API_BASE_URL}. Please check backend URL/deployment.`, 'error');
     }
   });
 

@@ -7,7 +7,23 @@ const app = express();
 
 // ✅ Middleware
 app.use(cors({
-  origin: "https://foodbridge-tau.vercel.app", // allow all (you can restrict later)
+  origin: (origin, callback) => {
+    // Allow server-to-server or curl/postman requests with no origin header.
+    if (!origin) return callback(null, true);
+
+    const allowedExact = new Set([
+      "https://foodbridge-tau.vercel.app",
+      process.env.FRONTEND_URL
+    ].filter(Boolean));
+
+    const isLocalhost = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+    const isVercelPreview = /^https:\/\/.*\.vercel\.app$/.test(origin);
+
+    if (allowedExact.has(origin) || isLocalhost || isVercelPreview) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  }
 }));
 app.use(express.json());
 
