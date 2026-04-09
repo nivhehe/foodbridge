@@ -2,54 +2,7 @@ node_modules/
 .env
 .DS_Store
 dist/
-build/ nivedmohan@Niveds-MacBook-Air food bridge copy % rm -rf .git
-nivedmohan@Niveds-MacBook-Air food bridge copy % git init
-hint: Using 'master' as the name for the initial branch. This default branch name
-hint: will change to "main" in Git 3.0. To configure the initial branch name
-hint: to use in all of your new repositories, which will suppress this warning,
-hint: call:
-hint:
-hint:   git config --global init.defaultBranch <name>
-hint:
-hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
-hint: 'development'. The just-created branch can be renamed via this command:
-hint:
-hint:   git branch -m <name>
-hint:
-hint: Disable this message with "git config set advice.defaultBranchName false"
-Initialized empty Git repository in /Users/nivedmohan/Documents/food bridge copy/.git/
-nivedmohan@Niveds-MacBook-Air food bridge copy % touch .gitignore
-nivedmohan@Niveds-MacBook-Air food bridge copy % open -e .gitignore
-nivedmohan@Niveds-MacBook-Air food bridge copy % git add .
-git commit -m "Initial clean upload"
-[master (root-commit) 6e0318a] Initial clean upload
- 17 files changed, 5291 insertions(+)
- create mode 100644 .gitignore
- create mode 100644 README.md
- create mode 100644 foodbridge-backend/app.js
- create mode 100644 foodbridge-backend/middleware/auth.js
- create mode 100644 foodbridge-backend/models/FoodItem.js
- create mode 100644 foodbridge-backend/models/Order.js
- create mode 100644 foodbridge-backend/models/Otp.js
- create mode 100644 foodbridge-backend/models/User.js
- create mode 100644 foodbridge-backend/package-lock.json
- create mode 100644 foodbridge-backend/package.json
- create mode 100644 foodbridge-backend/routes/auth.js
- create mode 100644 foodbridge-backend/routes/food.js
- create mode 100644 foodbridge-backend/routes/orders.js
- create mode 100644 foodbridge-backend/routes/users.js
- create mode 100644 foodbridge-backend/tempCodeRunnerFile.js
- create mode 100644 front end/dashboard.html
- create mode 100644 front end/index.html
-nivedmohan@Niveds-MacBook-Air food bridge copy % git remote add origin https://github.com/nivhehe/foodbridge.git
-nivedmohan@Niveds-MacBook-Air food bridge copy % git branch -M main
-git push -u origin main
-To https://github.com/nivhehe/foodbridge.git
- ! [rejected]        main -> main (fetch first)
-error: failed to push some refs to 'https://github.com/nivhehe/foodbridge.git'
-hint: Updates were rejected because the remote contains work that you do not
-hint: have locally. This is usually caused by another repository pushing to
-hint: the same ref. If you want to integrate the remote changes, use
-hint: 'git pull' before pushing again.
-hint: See the 'Note about fast-forwards' in 'git push --help' for details.
-nivedmohan@Niveds-MacBook-Air food bridge copy % 
+build/
+.vercel/
+coverage/
+*.log

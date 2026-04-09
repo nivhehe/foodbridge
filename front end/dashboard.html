@@ -1077,25 +1077,106 @@
 </div>
 
 <script>
+  const API_STORAGE_KEY = 'foodbridge_api_url';
+  const DEFAULT_REMOTE_API_URL = 'https://foodbridge-gloo.onrender.com/api';
+
   function normalizeApiUrl(url) {
     return String(url || '').trim().replace(/\/+$/, '');
   }
 
-  function resolveApiBaseUrl() {
-    const fromQuery = new URLSearchParams(window.location.search).get('api');
-    if (fromQuery) localStorage.setItem('foodbridge_api_url', normalizeApiUrl(fromQuery));
-
-    const fromGlobal = window.FOODBRIDGE_API_URL;
-    const fromStorage = localStorage.getItem('foodbridge_api_url');
-    const host = window.location.hostname || 'localhost';
-    const isLocal = /^(127\.0\.0\.1|localhost|0\.0\.0\.0|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})$/.test(host) || window.location.protocol === 'file:';
-    const fallback = isLocal ? `http://${host}:5001/api` : 'https://foodbridge-gloo.onrender.com/api';
-    if (isLocal) return normalizeApiUrl(fromGlobal || fromQuery || fallback);
-    return normalizeApiUrl(fromGlobal || fromStorage || fallback);
+  function isLocalHost(host) {
+    return /^(127\.0\.0\.1|localhost|0\.0\.0\.0|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})$/.test(host);
   }
 
-  const API_URL = resolveApiBaseUrl();
+  function getStoredApiUrl() {
+    return normalizeApiUrl(sessionStorage.getItem(API_STORAGE_KEY));
+  }
+
+  function rememberApiUrl(url) {
+    const normalized = normalizeApiUrl(url);
+    if (!normalized) return;
+    sessionStorage.setItem(API_STORAGE_KEY, normalized);
+  }
+
+  function resolveApiBaseUrl() {
+    const fromQuery = new URLSearchParams(window.location.search).get('api');
+    const fromGlobal = window.FOODBRIDGE_API_URL;
+    const host = window.location.hostname || 'localhost';
+    const isLocal = isLocalHost(host) || window.location.protocol === 'file:';
+    const fallback = isLocal ? `http://${host}:5001/api` : '/api';
+    return normalizeApiUrl(fromQuery || fromGlobal || getStoredApiUrl() || fallback);
+  }
+
+  let API_URL = resolveApiBaseUrl();
   const API_DEBUG_BADGE_ID = 'apiDebugBadge';
+
+  function getApiCandidates() {
+    const host = window.location.hostname || 'localhost';
+    const isLocal = isLocalHost(host) || window.location.protocol === 'file:';
+    const candidates = [
+      !isLocal ? '/api' : '',
+      normalizeApiUrl(new URLSearchParams(window.location.search).get('api')),
+      normalizeApiUrl(window.FOODBRIDGE_API_URL),
+      getStoredApiUrl(),
+      isLocal ? `http://${host}:5001/api` : '',
+      isLocal ? 'http://localhost:5001/api' : '',
+      isLocal ? 'http://127.0.0.1:5001/api' : '',
+      API_URL,
+      !isLocal ? DEFAULT_REMOTE_API_URL : ''
+    ].filter(Boolean);
+    return [...new Set(candidates)];
+  }
+
+  function buildApiUrl(base, path) {
+    const normalizedBase = normalizeApiUrl(base);
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    return `${normalizedBase}${normalizedPath}`;
+  }
+
+  async function fetchWithTimeout(url, options = {}, timeoutMs = 45000) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  async function apiFetch(path, options = {}, timeoutMs = 45000) {
+    const candidates = getApiCandidates();
+    let lastError = null;
+
+    for (const base of candidates) {
+      try {
+        const response = await fetchWithTimeout(buildApiUrl(base, path), options, timeoutMs);
+        const contentType = response.headers.get('content-type') || '';
+        const looksLikeHtml = contentType.includes('text/html');
+
+        if (response.status === 404 && looksLikeHtml) continue;
+        if (looksLikeHtml) continue;
+
+        API_URL = normalizeApiUrl(base);
+        rememberApiUrl(API_URL);
+        renderApiBadge();
+        return response;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    console.error('API candidates tried:', candidates, 'lastError:', lastError);
+    if (lastError) throw lastError;
+    throw new Error('No reachable API endpoint');
+  }
+
+  async function parseJsonResponse(response) {
+    try {
+      return await response.json();
+    } catch (error) {
+      return null;
+    }
+  }
 
   function renderApiBadge() {
     let badge = document.getElementById(API_DEBUG_BADGE_ID);
@@ -1182,10 +1263,14 @@
     const userId = localStorage.getItem('userId');
 
     try {
-      const res = await fetch(`${API_URL}/users/${userId}`, {
+      const res = await apiFetch(`/users/${userId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await res.json();
+      const data = await parseJsonResponse(res);
+
+      if (!res.ok || !data) {
+        throw new Error('Profile request failed');
+      }
 
       document.getElementById('viewUserId').textContent = userId;
       document.getElementById('viewUserType').textContent = document.getElementById('userType').textContent;
@@ -1219,7 +1304,7 @@
     };
 
     try {
-      const res = await fetch(`${API_URL}/users/${userId}`, {
+      const res = await apiFetch(`/users/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
@@ -1262,13 +1347,13 @@
     };
 
     try {
-      const res = await fetch(`${API_URL}/food`, {
+      const res = await apiFetch('/food', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data)
       });
 
-      const result = await res.json();
+      const result = await parseJsonResponse(res);
       if (res.ok) {
         const addressLine = result?.pickupLocation?.addressSentence ? ` ${result.pickupLocation.addressSentence}` : '';
         showMsg(`✓ Food posted successfully!${addressLine}`, 'success', 'postMsg');
@@ -1286,8 +1371,13 @@
 
  async function loadBrowseFood() {
   try {
-    const res = await fetch(`${API_URL}/food`);
-    const foods = await res.json();
+    const res = await apiFetch('/food');
+    const foods = await parseJsonResponse(res);
+
+    if (!res.ok || !Array.isArray(foods)) {
+      throw new Error('Food list request failed');
+    }
+
     document.getElementById('metricActivePosts').textContent = Array.isArray(foods) ? foods.length : 0;
     document.getElementById('metricPickupReady').textContent = Array.isArray(foods)
       ? foods.filter(f => f.pickupLocation && (f.pickupLocation.addressSentence || (f.pickupLocation.latitude && f.pickupLocation.longitude))).length
@@ -1327,10 +1417,15 @@
     const userId = localStorage.getItem('userId');
 
     try {
-      const res = await fetch(`${API_URL}/food/restaurant/${userId}`, {
+      const res = await apiFetch(`/food/restaurant/${userId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const foods = await res.json();
+      const foods = await parseJsonResponse(res);
+
+      if (!res.ok || !Array.isArray(foods)) {
+        throw new Error('My posts request failed');
+      }
+
       document.getElementById('metricMyPosts').textContent = Array.isArray(foods) ? foods.length : 0;
 
       const tbody = document.querySelector('#myPostsTable tbody');
@@ -1365,12 +1460,12 @@
     if (!confirmed) return;
 
     try {
-      const res = await fetch(`${API_URL}/food/${foodId}`, {
+      const res = await apiFetch(`/food/${foodId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      const result = await res.json();
+      const result = await parseJsonResponse(res);
       if (res.ok) {
         showMsg('✓ Food post deleted successfully', 'success', 'myPostsMsg');
         loadMyPosts();
@@ -1386,7 +1481,7 @@
   async function autoRemoveExpiredFood() {
     const token = localStorage.getItem('token');
     try {
-      await fetch(`${API_URL}/food/auto-remove`, {
+      await apiFetch('/food/auto-remove', {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
