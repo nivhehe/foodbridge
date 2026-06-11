@@ -1,18 +1,78 @@
 # FoodBridge — Eliminate Food Waste, Feed Communities
 
-FoodBridge is a real-time, full-stack web application designed to bridge the gap between local food businesses with surplus food and NGOs/community shelters who can distribute it. 
+FoodBridge is a full-stack web application that connects local food businesses (restaurants, caterers) with NGOs and community shelters to redistribute surplus food in real time.
 
-The platform offers a fast, clear, and accountable workflow to ensure safe food reaches those who need it most, rather than ending up in landfills.
+## Features
 
-## 🚀 Features
+- **Real-Time Listings** — Donors post surplus food with quantity, category, expiry window, and pickup coordinates. Listings update live.
+- **Live Discovery Feed** — NGOs browse, filter, and claim available donations instantly. Each listing shows restaurant info (name, address, contact).
+- **Secure Auth** — JWT-based registration/login with support for email or phone. Separate onboarding for Donors (restaurants) and Receivers (NGOs).
+- **Role-Based Dashboard** — Restaurants see "Post Food" and "My Posts"; NGOs see "Browse Food" with claim functionality. Both see a profile section.
+- **Messaging** — In-app messaging tied to orders for donor-receiver coordination (`/api/messages`).
+- **Order Management** — Track claimed donations with status, pickup details, and timestamps.
+- **Auto-Expiry** — Expired food listings are automatically removed from the feed.
+- **Geolocation** — Pickup coordinates with "Use My Current Location" support and auto-generated address sentences.
+- **Wise-Inspired Design** — Clean, glassmorphic UI with a custom design system documented in `DESIGN.md`.
 
-- 🕒 **Real-Time Listings:** Food businesses can list surplus food items with quantity, expiry details, and pickup windows.
-- 🗺️ **Live Discovery Feed:** NGOs can browse, filter, and claim available food donations instantly.
-- 🔒 **Secure Auth:** Separate onboarding and dashboard flows for Donors (Restaurants/Caterers) and Receivers (NGOs/Shelters) using JWT.
-- 📱 **Premium Modern UI:** Responsive glassmorphic layout styled with custom CSS variables and custom animations.
+## Tech Stack
 
-## 🛠️ Tech Stack
-
-- **Frontend:** Semantic HTML5, Vanilla CSS (Glassmorphism, custom CSS variables)
+- **Frontend:** HTML5, Vanilla CSS (glassmorphism, custom properties), responsive layout
 - **Backend:** Node.js, Express.js (REST API)
-- **Database:** MongoDB & Mongoose
+- **Database:** MongoDB + Mongoose ODM
+- **Auth:** JWT + bcryptjs
+- **Deployment:** Render (backend), Vercel (frontend)
+
+## Models
+
+| Model | Fields |
+|---|---|
+| `User` | email, phone, password (bcrypt), userType (restaurant/ngo), orgName, address, description |
+| `FoodItem` | name, category, quantity, unit, description, expiryTime, pickupLocation (lat/lng + addressSentence), postedBy (ref User), status |
+| `Order` | foodItem (ref FoodItem), donor (ref User), receiver (ref User), status, timestamps |
+| `Message` | order (ref Order), sender (ref User), text, timestamps |
+| `Otp` | email/phone, otp, expiresAt |
+
+## API Routes
+
+| Endpoint | Description |
+|---|---|
+| `POST /api/auth/register` | Register new user (email/phone + password + userType) |
+| `POST /api/auth/login` | Login via email or phone |
+| `GET /api/users/:id` | Get user profile |
+| `PUT /api/users/:id` | Update user profile |
+| `GET /api/food` | List all active food items |
+| `GET /api/food/restaurant/:userId` | List restaurant's own posts |
+| `POST /api/food` | Create a food listing |
+| `DELETE /api/food/:id` | Delete a food post |
+| `DELETE /api/food/auto-remove` | Auto-remove expired listings |
+| `GET /api/orders` | List orders (filtered by role) |
+| `POST /api/orders` | Create/claim an order |
+| `PUT /api/orders/:id` | Update order status |
+| `GET /api/messages/:orderId` | Get messages for an order |
+| `POST /api/messages` | Send a message |
+
+## Getting Started
+
+```bash
+# Backend
+cd foodbridge-backend
+npm install
+cp .env.example .env   # Set MONGODB_URI, JWT_SECRET, PORT
+npm start
+
+# Frontend — open front end/index.html in browser
+# or deploy front end/ to Vercel/Netlify
+```
+
+## Environment Variables
+
+| Variable | Description |
+|---|---|
+| `MONGODB_URI` | MongoDB connection string |
+| `JWT_SECRET` | Secret for signing JWTs (default: foodbridgeSecret2025) |
+| `PORT` | Server port (default: 5001) |
+| `CORS_ORIGIN` | Comma-separated allowed CORS origins |
+
+## Design System
+
+A complete Wise-inspired design token system is documented in `DESIGN.md`, including colors, typography scale (Wise Sans + Inter), spacing, border radius, and component specifications.
