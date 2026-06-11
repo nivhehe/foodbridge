@@ -1,8 +1,22 @@
 {
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/:path*",
-      "destination": "https://foodbridge-gloo.onrender.com/api/:path*"
+      "src": "front end/**/*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "front end/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://foodbridge-gloo.onrender.com/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "front end/$1"
     }
   ]
 }
