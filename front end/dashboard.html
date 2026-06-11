@@ -529,6 +529,8 @@
       color: #999;
     }
 
+    .ngo-hidden { display: none !important; }
+
     .msg {
       padding: 14px;
       border-radius: 10px;
@@ -1208,12 +1210,12 @@
 
     // Hide sections for NGO
     if (isNGO) {
-      document.getElementById('postFoodNav').style.display = 'none';
-      document.getElementById('post').style.display = 'none';
-      document.getElementById('myPostsNav').style.display = 'none';
-      document.getElementById('myposts').style.display = 'none';
-      document.getElementById('historyNav').style.display = 'none';
-      document.getElementById('history').style.display = 'none';
+      document.getElementById('postFoodNav').classList.add('ngo-hidden');
+      document.getElementById('post').classList.add('ngo-hidden');
+      document.getElementById('myPostsNav').classList.add('ngo-hidden');
+      document.getElementById('myposts').classList.add('ngo-hidden');
+      document.getElementById('historyNav').classList.add('ngo-hidden');
+      document.getElementById('history').classList.add('ngo-hidden');
       document.getElementById('orgNameLabel').textContent = 'NGO Name:';
       document.getElementById('orgNameEditLabel').textContent = 'NGO Name *';
       document.getElementById('metricMyPostsLabel').textContent = 'Your Claimed/Own Posts';
@@ -1400,7 +1402,8 @@
         <td>${f.pickupLocation?.addressSentence || `Coordinates: ${f.pickupLocation?.latitude || '-'}, ${f.pickupLocation?.longitude || '-'}`}</td>
         <td>
           <button style="padding:6px 14px; background:#1f7a53; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700;"
-            onclick='showFoodModal(${JSON.stringify(f)})'>
+            data-food='${JSON.stringify(f).replace(/'/g, "&#39;")}'
+            onclick='showFoodModal(this)'>
             View Details
           </button>
         </td>
@@ -1500,7 +1503,8 @@
     document.getElementById('foodModal').style.display = 'none';
   }
 
-  async function showFoodModal(food) {
+  async function showFoodModal(btn) {
+  const food = JSON.parse(btn.dataset.food);
   const restInfo = food.postedBy;
   const locationSentence = food.pickupLocation?.addressSentence || `Pickup is available at coordinates (${food.pickupLocation?.latitude || '-'}, ${food.pickupLocation?.longitude || '-'}).`;
 

@@ -78,7 +78,7 @@ router.get('/restaurant/:userId', authenticate, async (req, res) => {
   const foods = await FoodItem.find({ postedBy: req.params.userId });
   const nonExpired = foods.filter(food => {
     const expiresAt = new Date(food.createdAt.getTime() + food.expiryTime * 60 * 60 * 1000);
-    return expiresAt > now && food.status === 'Active';
+    return expiresAt > now && (food.status === 'Active' || food.status === 'Claimed');
   });
   res.json(nonExpired);
 });
@@ -106,6 +106,10 @@ router.delete('/:foodId', authenticate, async (req, res) => {
   if (String(food.postedBy) !== String(req.user.userId)) {
     return res.status(403).json({ message: 'You can delete only your own food posts' });
   }
+
+  // Delete any orders/claims associated with this food post
+  const Order = require('../models/Order');
+  await Order.deleteMany({ food: req.params.foodId });
 
   await FoodItem.findByIdAndDelete(req.params.foodId);
   return res.json({ message: 'Food post deleted successfully' });

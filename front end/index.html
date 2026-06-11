@@ -1337,7 +1337,7 @@
       if (res.ok) {
         showMessage('✓ Registration successful! Please log in.', 'success');
         setTimeout(() => {
-          showForm('login', document.querySelector('.tab[onclick*="login"]'));
+          showForm('login', document.querySelectorAll('.tab')[0]);
           document.getElementById('loginForm').reset();
           document.getElementById('registerForm').reset();
         }, 1400);
