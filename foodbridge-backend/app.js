@@ -53,6 +53,23 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, service: 'foodbridge-backend' });
 });
 
+// ❌ 404 Handler for Unmatched API Routes
+app.use((req, res, next) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: `API endpoint '${req.originalUrl}' not found.`
+  });
+});
+
+// ❌ 500 Global Error Handler Middleware
+app.use((err, req, res, next) => {
+  console.error('🔥 Server Error:', err);
+  res.status(err.status || 500).json({
+    error: 'Internal Server Error',
+    message: err.message || 'An unexpected error occurred on the server.'
+  });
+});
+
 // ✅ ENV variables
 const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGODB_URI;

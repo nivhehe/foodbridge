@@ -1,4 +1,7 @@
 node_modules/
+foodbridge-backend/worker/node_modules/
+foodbridge-backend/.wrangler/
+foodbridge-backend/worker/.wrangler/
 .env
 .DS_Store
 dist/

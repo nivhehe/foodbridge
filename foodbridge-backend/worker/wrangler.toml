@@ -1,0 +1,14 @@
+name = "foodbridge-api"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+compatibility_flags = ["nodejs_compat_v2"]
+
+routes = [
+  { pattern = "foodbridge.online/api/*", zone_id = "d357e860a5776d44efbb149c7f83d402" },
+  { pattern = "www.foodbridge.online/api/*", zone_id = "d357e860a5776d44efbb149c7f83d402" },
+]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "foodbridge"
+database_id = "d7235fef-e650-42ca-a806-41bd3229f6af"
