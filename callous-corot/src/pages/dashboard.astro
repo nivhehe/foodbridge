@@ -1,0 +1,2025 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="FoodBridge - Interactive Dashboard">
+  <!-- Leaflet Interactive Map Assets -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <style is:global>
+    @keyframes drift-1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(60px, -40px) scale(1.05); }
+    }
+    @keyframes drift-2 {
+      0%, 100% { transform: translate(0, 0) scale(1.03); }
+      50% { transform: translate(-50px, 50px) scale(0.97); }
+    }
+    .animate-drift-1 {
+      animation: drift-1 25s ease-in-out infinite;
+    }
+    .animate-drift-2 {
+      animation: drift-2 30s ease-in-out infinite;
+    }
+    .map-grid {
+      background-color: #f0f3eb;
+      background-image: 
+        radial-gradient(#d5d8cf 1.2px, transparent 1.2px),
+        linear-gradient(to right, rgba(0,0,0,0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0,0,0,0.015) 1px, transparent 1px);
+      background-size: 24px 24px, 96px 96px, 96px 96px;
+    }
+    /* Smooth tab fade-in */
+    .tab-content {
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+
+  <!-- Interactive Mesh Background & Atmosphere -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div class="absolute -right-32 -top-32 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-primary/10 via-primary-pale/5 to-transparent blur-3xl opacity-50 animate-drift-1"></div>
+    <div class="absolute -left-40 top-1/3 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-accent-orange/5 via-accent-cyan/3 to-transparent blur-3xl opacity-40 animate-drift-2"></div>
+    <div class="absolute right-1/4 bottom-10 w-[550px] h-[550px] rounded-full bg-gradient-to-br from-primary-pale/10 via-canvas-soft/5 to-transparent blur-3xl opacity-60"></div>
+  </div>
+
+  <div class="flex flex-col lg:flex-row min-h-screen bg-gradient-to-br from-canvas-soft via-canvas to-primary-pale/20 text-ink font-inter relative z-10">
+    
+    <!-- Premium Sidebar -->
+    <aside class="w-full lg:w-[290px] bg-ink text-canvas-soft p-lg flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-ink/10 shadow-2xl lg:fixed lg:h-screen z-40 backdrop-blur-xl dark:bg-canvas dark:text-body">
+      <div>
+        <!-- Header with Hamburger on Mobile -->
+        <div class="flex items-center justify-between mb-lg lg:mb-2xl">
+          <!-- Logo Lockup -->
+          <div class="flex items-center gap-md p-xs">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-2xl bg-gradient-to-br from-primary via-primary-neutral to-primary-active shadow-lg shadow-primary/20 transform hover:scale-105 transition-transform duration-200 select-none">
+              🍽️
+            </div>
+            <div>
+              <div class="font-wise-sans font-black text-xl tracking-tight leading-none text-primary select-none">FoodBridge</div>
+              <div class="text-[9px] text-canvas-soft/60 font-bold uppercase tracking-wider mt-[4px] block select-none dark:text-body/60">Smart Redistribution</div>
+            </div>
+          </div>
+
+          <!-- Hamburger Button (mobile only) -->
+          <button onclick="toggleMobileMenu()" class="lg:hidden p-sm text-canvas-soft hover:text-white hover:bg-canvas-soft/10 rounded-xl cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary dark:text-body dark:hover:text-ink dark:hover:bg-body/10" aria-label="Toggle Navigation Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <!-- Nav container that collapses on mobile -->
+        <div id="mobileNavWrapper" class="hidden lg:flex flex-col flex-1 justify-between gap-xl">
+          <!-- Navigation Links with Custom Active Glow -->
+          <nav class="flex flex-col gap-sm" id="sidebarNav">
+            <button id="nav-overview" class="w-full text-left py-md px-lg rounded-xl font-bold text-sm transition-all duration-200 cursor-pointer text-on-primary bg-primary flex items-center gap-sm shadow-lg shadow-primary/10 group focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick="switchTab('overview')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110 shrink-0"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+              Dashboard
+            </button>
+            <button id="nav-post" class="w-full text-left py-md px-lg rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer text-canvas-soft/60 hover:text-white hover:bg-canvas-soft/5 dark:text-body/60 dark:hover:text-ink dark:hover:bg-body/5 flex items-center gap-sm group focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick="switchTab('post')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110 shrink-0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Post Food
+            </button>
+            <button id="nav-browse" class="w-full text-left py-md px-lg rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer text-canvas-soft/60 hover:text-white hover:bg-canvas-soft/5 dark:text-body/60 dark:hover:text-ink dark:hover:bg-body/5 flex items-center gap-sm group focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick="switchTab('browse')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110 shrink-0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Browse Food
+            </button>
+            <button id="nav-myposts" class="w-full text-left py-md px-lg rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer text-canvas-soft/60 hover:text-white hover:bg-canvas-soft/5 dark:text-body/60 dark:hover:text-ink dark:hover:bg-body/5 flex items-center gap-sm group focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick="switchTab('myposts')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110 shrink-0"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+              My Posts
+            </button>
+            <button id="nav-history" class="w-full text-left py-md px-lg rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer text-canvas-soft/60 hover:text-white hover:bg-canvas-soft/5 dark:text-body/60 dark:hover:text-ink dark:hover:bg-body/5 flex items-center gap-sm group focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick="switchTab('history')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110 shrink-0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              History
+            </button>
+            <button id="nav-chats" class="w-full text-left py-md px-lg rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer text-canvas-soft/60 hover:text-white hover:bg-canvas-soft/5 dark:text-body/60 dark:hover:text-ink dark:hover:bg-body/5 flex items-center gap-sm group focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick="switchTab('chats')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110 shrink-0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Chats
+            </button>
+            <button id="nav-profile" class="w-full text-left py-md px-lg rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer text-canvas-soft/60 hover:text-white hover:bg-canvas-soft/5 dark:text-body/60 dark:hover:text-ink dark:hover:bg-body/5 flex items-center gap-sm group focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick="switchTab('profile')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110 shrink-0"><path d="M20 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Profile
+            </button>
+          </nav>
+
+          <!-- Logout Component with Red Hue -->
+          <button class="w-full py-md px-lg bg-transparent border border-negative/30 hover:bg-negative hover:text-canvas-soft dark:hover:text-body text-negative rounded-xl font-bold text-sm transition-all duration-200 cursor-pointer mt-2xl flex items-center justify-center gap-sm shadow-sm hover:shadow-negative/15 focus-visible:ring-2 focus-visible:ring-negative focus-visible:outline-none group" onclick="logout()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] transition-transform duration-200 group-hover:translate-x-1"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 lg:ml-[290px] p-lg md:p-2xl flex flex-col gap-xl">
+      
+      <!-- Top Premium Header Bar -->
+      <header class="bg-canvas/80 backdrop-blur-md border border-ink/5 rounded-xl p-lg shadow-sm flex flex-col md:flex-row justify-between items-center gap-md">
+        <div>
+          <h1 id="pageTitle" class="display-sm text-ink mb-[2px] font-black text-wrap-balance">Dashboard Overview</h1>
+          <p class="body-sm text-mute">Track donations, coordinate pickups, and reduce food waste in real time.</p>
+        </div>
+        
+        <!-- Theme Toggle & User Block -->
+        <div class="flex items-center gap-md">
+          <button id="themeToggleBtn" onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-canvas border border-ink/10 flex items-center justify-center text-ink hover:bg-canvas-soft cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary shrink-0" aria-label="Toggle Dark Mode">
+            <!-- Sun Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 block dark:hidden"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <!-- Moon Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 hidden dark:block"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+          
+          <div class="flex items-center gap-md p-[2px] bg-canvas-soft/50 rounded-full pr-lg border border-canvas-soft">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary via-primary-neutral to-primary-active text-on-primary flex items-center justify-center font-black text-xl shadow-md border border-canvas" id="userAvatar">
+              U
+            </div>
+            <div>
+              <div class="body-md-strong text-ink leading-tight" id="userName">User Name</div>
+              <div class="text-[10px] text-mute font-bold uppercase tracking-wider mt-[2px]" id="userType">Restaurant / Donor</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- SECTIONS -->
+
+      <!-- 1. Overview Section -->
+      <section id="overview" class="tab-content flex flex-col gap-xl">
+        <!-- Highlights Cards with Glassmorphism -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
+          
+          <!-- Card 1: Reduce Waste -->
+          <div class="bg-canvas/90 backdrop-blur-md p-xl rounded-xl border border-ink/5 flex flex-col gap-md transition-[box-shadow,border-color,transform] duration-300 hover:border-primary/40 hover:shadow-md motion-safe:hover:-translate-y-[4px] relative overflow-hidden group">
+            <div class="absolute -right-10 -bottom-10 w-28 h-28 rounded-full bg-primary/10 blur-xl opacity-80 transition-[transform,opacity] duration-500 group-hover:scale-125 group-hover:opacity-100 pointer-events-none" aria-hidden="true"></div>
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/25 text-ink-deep border border-primary/20 shadow-xs transition-transform duration-300 group-hover:scale-110">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+                <path d="M21 3v5h-5" />
+                <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+                <path d="M3 21v-5h5" />
+              </svg>
+            </div>
+            <div class="flex flex-col gap-xxs z-10">
+              <h3 class="body-md-strong text-ink font-bold tracking-tight text-[17px] text-wrap-balance group-hover:text-ink-deep transition-colors duration-200">Reduce Waste</h3>
+              <p class="caption text-mute leading-relaxed mt-xxs">Divert surplus meals from landfills and promote environmental health.</p>
+            </div>
+          </div>
+
+          <!-- Card 2: Feed Hope -->
+          <div class="bg-canvas/90 backdrop-blur-md p-xl rounded-xl border border-ink/5 flex flex-col gap-md transition-[box-shadow,border-color,transform] duration-300 hover:border-accent-orange/40 hover:shadow-md motion-safe:hover:-translate-y-[4px] relative overflow-hidden group">
+            <div class="absolute -right-10 -bottom-10 w-28 h-28 rounded-full bg-accent-orange/10 blur-xl opacity-80 transition-[transform,opacity] duration-500 group-hover:scale-125 group-hover:opacity-100 pointer-events-none" aria-hidden="true"></div>
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-accent-orange/10 to-accent-orange/25 text-negative-deep border border-accent-orange/20 shadow-xs transition-transform duration-300 group-hover:scale-110">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+              </svg>
+            </div>
+            <div class="flex flex-col gap-xxs z-10">
+              <h3 class="body-md-strong text-ink font-bold tracking-tight text-[17px] text-wrap-balance group-hover:text-ink-deep transition-colors duration-200">Feed Hope</h3>
+              <p class="caption text-mute leading-relaxed mt-xxs">Enable local charities to recover food and feed families in need.</p>
+            </div>
+          </div>
+
+          <!-- Card 3: Carbon Offset -->
+          <div class="bg-canvas/90 backdrop-blur-md p-xl rounded-xl border border-ink/5 flex flex-col gap-md transition-[box-shadow,border-color,transform] duration-300 hover:border-accent-cyan/40 hover:shadow-md motion-safe:hover:-translate-y-[4px] relative overflow-hidden group">
+            <div class="absolute -right-10 -bottom-10 w-28 h-28 rounded-full bg-accent-cyan/10 blur-xl opacity-80 transition-[transform,opacity] duration-500 group-hover:scale-125 group-hover:opacity-100 pointer-events-none" aria-hidden="true"></div>
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-accent-cyan/10 to-accent-cyan/25 text-[#0891b2] border border-accent-cyan/20 shadow-xs transition-transform duration-300 group-hover:scale-110">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 1 8a7 7 0 0 1-9 10Z" />
+                <path d="M19 2c-2.26 4.33-5.27 7.14-8 10" />
+              </svg>
+            </div>
+            <div class="flex flex-col gap-xxs z-10">
+              <h3 class="body-md-strong text-ink font-bold tracking-tight text-[17px] text-wrap-balance group-hover:text-ink-deep transition-colors duration-200">Carbon Offset</h3>
+              <p class="caption text-mute leading-relaxed mt-xxs">Track carbon footprint reduction dynamically based on surplus shared.</p>
+            </div>
+          </div>
+
+          <!-- Card 4: Community -->
+          <div class="bg-canvas/90 backdrop-blur-md p-xl rounded-xl border border-ink/5 flex flex-col gap-md transition-[box-shadow,border-color,transform] duration-300 hover:border-primary-neutral/40 hover:shadow-md motion-safe:hover:-translate-y-[4px] relative overflow-hidden group">
+            <div class="absolute -right-10 -bottom-10 w-28 h-28 rounded-full bg-primary-pale/15 blur-xl opacity-80 transition-[transform,opacity] duration-500 group-hover:scale-125 group-hover:opacity-100 pointer-events-none" aria-hidden="true"></div>
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-primary-neutral/20 to-primary-neutral/45 text-[#c2410c] border border-primary-neutral/30 shadow-xs transition-transform duration-300 group-hover:scale-110">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <div class="flex flex-col gap-xxs z-10">
+              <h3 class="body-md-strong text-ink font-bold tracking-tight text-[17px] text-wrap-balance group-hover:text-ink-deep transition-colors duration-200">Community</h3>
+              <p class="caption text-mute leading-relaxed mt-xxs">Build trusted linkages between local businesses and food banks.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-xl">
+          <!-- Metrics Visual Section -->
+          <div class="bg-canvas border border-ink/5 rounded-xl p-xl shadow-sm flex flex-col gap-lg relative overflow-hidden">
+            <h3 class="display-xs text-ink font-black border-b border-canvas-soft pb-sm select-none text-wrap-balance">Live Platform Snapshot</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-md font-inter">
+              <!-- Metric 1: Active Listings -->
+              <div class="bg-canvas p-lg rounded-xl text-center border border-canvas-soft border-t-4 border-t-primary/70 shadow-sm relative overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-[2px]">
+                <div class="display-sm text-ink font-black mb-[2px] tracking-tight tabular-nums" id="metricActivePosts">0</div>
+                <div class="caption text-mute font-bold uppercase tracking-wider text-[10px] select-none">Active Listings</div>
+              </div>
+              <!-- Metric 2: Live Claims -->
+              <div class="bg-canvas p-lg rounded-xl text-center border border-canvas-soft border-t-4 border-t-accent-orange/70 shadow-sm relative overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-[2px]">
+                <div class="display-sm text-ink font-black mb-[2px] tracking-tight tabular-nums" id="metricMyPosts">0</div>
+                <div class="caption text-mute font-bold uppercase tracking-wider text-[10px] select-none" id="metricMyPostsLabel">My Active Posts</div>
+              </div>
+              <!-- Metric 3: Pickup Ready -->
+              <div class="bg-canvas p-lg rounded-xl text-center border border-canvas-soft border-t-4 border-t-accent-cyan/70 shadow-sm relative overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-[2px]">
+                <div class="display-sm text-ink font-black mb-[2px] tracking-tight tabular-nums" id="metricPickupReady">0</div>
+                <div class="caption text-mute font-bold uppercase tracking-wider text-[10px] select-none">Pickup Ready</div>
+              </div>
+            </div>
+
+            <!-- Weekly Performance Mini-Chart -->
+            <div class="flex flex-col gap-sm mt-sm border-t border-canvas-soft pt-lg">
+              <h4 class="body-sm-strong text-ink font-bold uppercase tracking-wider text-[11px] mb-xs">Daily Rescued Meals (Past 5 Days)</h4>
+              <div class="flex items-end justify-between gap-sm h-32 px-md pt-md pb-xs bg-canvas-soft/10 rounded-xl border border-canvas-soft/30">
+                <div class="flex flex-col items-center justify-end h-full flex-1 group gap-xxs">
+                  <span class="caption text-[10px] text-mute font-bold opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">42 meals</span>
+                  <div class="w-8 md:w-12 bg-primary-neutral hover:bg-primary rounded-t-md transition-all duration-300 h-[60%] group-hover:scale-y-105 origin-bottom relative shadow-xs"></div>
+                  <span class="caption text-[10px] text-mute font-bold select-none">Mon</span>
+                </div>
+                <div class="flex flex-col items-center justify-end h-full flex-1 group gap-xxs">
+                  <span class="caption text-[10px] text-mute font-bold opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">28 meals</span>
+                  <div class="w-8 md:w-12 bg-primary-neutral hover:bg-primary rounded-t-md transition-all duration-300 h-[40%] group-hover:scale-y-105 origin-bottom relative shadow-xs"></div>
+                  <span class="caption text-[10px] text-mute font-bold select-none">Tue</span>
+                </div>
+                <div class="flex flex-col items-center justify-end h-full flex-1 group gap-xxs">
+                  <span class="caption text-[10px] text-mute font-bold opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">75 meals</span>
+                  <div class="w-8 md:w-12 bg-primary hover:bg-primary-active rounded-t-md transition-all duration-300 h-[90%] group-hover:scale-y-105 origin-bottom relative shadow-md shadow-primary/10"></div>
+                  <span class="caption text-[10px] text-mute font-bold select-none">Wed</span>
+                </div>
+                <div class="flex flex-col items-center justify-end h-full flex-1 group gap-xxs">
+                  <span class="caption text-[10px] text-mute font-bold opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">50 meals</span>
+                  <div class="w-8 md:w-12 bg-primary-neutral hover:bg-primary rounded-t-md transition-all duration-300 h-[70%] group-hover:scale-y-105 origin-bottom relative shadow-xs"></div>
+                  <span class="caption text-[10px] text-mute font-bold select-none">Thu</span>
+                </div>
+                <div class="flex flex-col items-center justify-end h-full flex-1 group gap-xxs">
+                  <span class="caption text-[10px] text-mute font-bold opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">90 meals</span>
+                  <div class="w-8 md:w-12 bg-primary hover:bg-primary-active rounded-t-md transition-all duration-300 h-[100%] group-hover:scale-y-105 origin-bottom relative shadow-md shadow-primary/10"></div>
+                  <span class="caption text-[10px] text-mute font-bold select-none">Today</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gamified Stats Box -->
+            <div class="mt-md bg-gradient-to-br from-ink-deep via-ink to-ink p-xl rounded-xl border border-primary/20 flex flex-col md:flex-row justify-between items-center gap-md relative overflow-hidden group shadow-lg">
+              <div class="absolute -right-16 -top-16 w-36 h-36 rounded-full bg-primary/5 group-hover:scale-125 transition-transform duration-700 blur-2xl"></div>
+              <div class="flex items-center gap-lg relative z-10">
+                <span class="text-4xl filter drop-shadow-[0_4px_6px_rgba(159,232,112,0.3)] select-none">☘️</span>
+                <div>
+                  <strong class="body-md-strong text-primary block font-bold tracking-tight text-lg mb-[4px] text-wrap-balance">Environmental Impact Score</strong>
+                  <p class="body-sm text-canvas-soft/80 leading-relaxed">
+                    You’ve saved the equivalent of <strong class="text-primary font-black text-base tabular-nums" id="metricCo2Saved">0</strong>&nbsp;kg of CO2 emissions by sharing surplus food.
+                  </p>
+                </div>
+              </div>
+              <div class="bg-primary text-on-primary rounded-full px-lg py-md font-bold text-xs shadow-lg hover:scale-105 transition-transform duration-300 shrink-0 border border-primary-active/20 select-none">
+                Gold Eco Partner 🏆
+              </div>
+            </div>
+          </div>
+
+          <!-- Process Flow Chart -->
+          <div class="bg-canvas border border-ink/5 rounded-xl p-xl shadow-sm flex flex-col justify-between relative overflow-hidden">
+            <div>
+              <h3 class="display-xs text-ink font-black border-b border-canvas-soft pb-sm mb-xl text-wrap-balance">Redistribution Loop</h3>
+              
+              <div class="relative pl-lg flex flex-col gap-xl">
+                <!-- Timeline vertical line connector -->
+                <div class="absolute left-[17px] top-[10px] bottom-[10px] w-[2px] bg-canvas-soft"></div>
+                
+                <div class="relative flex gap-md items-start group">
+                  <div class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm shrink-0 shadow-md transition-all group-hover:bg-primary-active group-hover:scale-110 z-10">1</div>
+                  <div>
+                    <h4 class="body-sm-strong text-ink font-bold group-hover:text-primary-active transition-colors text-wrap-balance">Post Surplus</h4>
+                    <p class="caption text-mute mt-[2px] leading-relaxed">Donors post available meals specifying quantity, expiry time, and location coordinates.</p>
+                  </div>
+                </div>
+
+                <div class="relative flex gap-md items-start group">
+                  <div class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm shrink-0 shadow-md transition-all group-hover:bg-primary-active group-hover:scale-110 z-10">2</div>
+                  <div>
+                    <h4 class="body-sm-strong text-ink font-bold group-hover:text-primary-active transition-colors text-wrap-balance">Claim and Route</h4>
+                    <p class="caption text-mute mt-[2px] leading-relaxed">NGO partners browse matching listings and secure coordination contacts instantly.</p>
+                  </div>
+                </div>
+
+                <div class="relative flex gap-md items-start group">
+                  <div class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm shrink-0 shadow-md transition-all group-hover:bg-primary-active group-hover:scale-110 z-10">3</div>
+                  <div>
+                    <h4 class="body-sm-strong text-ink font-bold group-hover:text-primary-active transition-colors text-wrap-balance">Secure Handshake</h4>
+                    <p class="caption text-mute mt-[2px] leading-relaxed">Pickup is verified securely at the premises via a unique numerical handshake code.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Post Food Section -->
+      <section id="post" class="tab-content hidden">
+        <div class="bg-canvas border border-ink/5 rounded-xl p-xl shadow-sm">
+          <h2 class="display-xs text-ink font-black border-b border-canvas-soft pb-sm mb-lg">Post Surplus Food</h2>
+          <div id="postMsg" class="hidden p-md rounded-xl text-sm font-bold leading-relaxed mb-md"></div>
+          
+          <form id="postForm" class="grid grid-cols-1 md:grid-cols-2 gap-lg" autocomplete="off">
+            <div class="flex flex-col gap-xs">
+              <label for="foodName" class="body-sm-strong text-ink">Food Name *</label>
+              <input type="text" id="foodName" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary" placeholder="e.g., Cooked Rice & Dal…" required>
+            </div>
+            
+            <div class="flex flex-col gap-xs">
+              <label for="foodCategory" class="body-sm-strong text-ink">Category *</label>
+              <select id="foodCategory" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary" required>
+                <option value="">Select Category…</option>
+                <option value="cooked">Cooked Meals</option>
+                <option value="raw">Raw Ingredients</option>
+                <option value="bakery">Bakery</option>
+                <option value="beverages">Beverages</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-xs">
+              <label for="foodQty" class="body-sm-strong text-ink">Quantity *</label>
+              <input type="number" id="foodQty" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary" placeholder="e.g., 20…" min="1" required>
+            </div>
+
+            <div class="flex flex-col gap-xs">
+              <label for="foodUnit" class="body-sm-strong text-ink">Unit *</label>
+              <select id="foodUnit" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary" required>
+                <option value="">Select Unit…</option>
+                <option value="kg">Kilograms (kg)</option>
+                <option value="pieces">Pieces</option>
+                <option value="liters">Liters</option>
+                <option value="servings">Servings / Meals</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-xs">
+              <label for="foodExpiry" class="body-sm-strong text-ink">Expiry Time (Hours) *</label>
+              <input type="number" id="foodExpiry" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary" placeholder="e.g., 6…" min="1" required>
+            </div>
+
+            <div class="flex flex-col gap-xs">
+              <label for="foodStorage" class="body-sm-strong text-ink">Storage Requirements</label>
+              <select id="foodStorage" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary">
+                <option value="ambient">Ambient (Room Temp)</option>
+                <option value="refrigerated">Refrigerated</option>
+                <option value="frozen">Frozen</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-xs md:col-span-2">
+              <label for="foodDesc" class="body-sm-strong text-ink">Description</label>
+              <textarea id="foodDesc" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 h-24 focus-visible:ring-2 focus-visible:ring-primary" placeholder="Mention ingredients, allergen warnings, or packaging details…"></textarea>
+            </div>
+
+            <!-- Geolocation Inputs -->
+            <div class="flex flex-col gap-xs">
+              <label for="pickupLatitude" class="body-sm-strong text-ink">Pickup Latitude *</label>
+              <input type="number" id="pickupLatitude" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary" placeholder="e.g., 12.971599…" step="any" required>
+            </div>
+
+            <div class="flex flex-col gap-xs">
+              <label for="pickupLongitude" class="body-sm-strong text-ink">Pickup Longitude *</label>
+              <input type="number" id="pickupLongitude" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary" placeholder="e.g., 77.594566…" step="any" required>
+            </div>
+
+            <div class="md:col-span-2">
+              <button type="button" class="bg-canvas-soft border border-ink/15 text-ink hover:bg-primary-pale transition-all duration-200 rounded-xl px-xl py-md text-sm font-bold cursor-pointer inline-flex items-center gap-sm focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick="fillCurrentCoordinates()">
+                📍 Use My Current Location
+              </button>
+            </div>
+
+            <div class="md:col-span-2 p-md border border-dashed border-ink/10 text-mute rounded-xl bg-canvas-soft/20 text-xs font-semibold leading-relaxed" id="pickupPreview">
+              Pickup address sentence will be auto-generated from these coordinates when you post.
+            </div>
+
+            <button type="submit" id="postSubmitBtn" class="bg-primary text-on-primary hover:bg-primary-active transition-all duration-200 rounded-xl py-md text-base font-bold shadow-md shadow-primary/10 md:col-span-2 cursor-pointer mt-md flex items-center justify-center gap-sm focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
+              <span id="postBtnSpinner" class="hidden animate-spin rounded-full h-4 w-4 border-2 border-on-primary border-t-transparent"></span>
+              <span id="postBtnText">Post Details 🚀</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- 3. Browse Food Section -->
+      <section id="browse" class="tab-content hidden">
+        <div class="bg-canvas border border-ink/5 rounded-xl p-xl shadow-sm overflow-hidden flex flex-col gap-lg animate-fadeIn">
+          <div class="flex flex-col md:flex-row justify-between items-center gap-md border-b border-canvas-soft pb-sm">
+            <h2 class="display-xs text-ink font-black text-wrap-balance">Browse Available Listings</h2>
+            
+            <!-- Map View / List View Toggle Switch -->
+            <div class="flex bg-canvas-soft p-[2px] rounded-xl border border-canvas-soft select-none">
+              <button id="viewListBtn" class="py-[6px] px-lg rounded-lg text-xs font-bold bg-canvas text-ink shadow-xs cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick="toggleBrowseView('list')">
+                📋 List View
+              </button>
+              <button id="viewMapBtn" class="py-[6px] px-lg rounded-lg text-xs font-bold text-mute hover:text-ink cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick="toggleBrowseView('map')">
+                🗺️ Map View (Beta)
+              </button>
+            </div>
+          </div>
+          
+          <div id="browseMsg" class="hidden p-md rounded-xl text-sm font-bold leading-relaxed mb-md"></div>
+
+          <!-- Listings Table (List View) -->
+          <div class="overflow-x-auto" id="browseListView">
+            <table class="w-full text-left border-collapse" id="browseTable">
+              <thead>
+                <tr class="bg-ink text-canvas-soft border-b border-ink/10 text-xs font-bold uppercase select-none">
+                  <th class="p-md">Food Name</th>
+                  <th class="p-md">Category</th>
+                  <th class="p-md">Quantity</th>
+                  <th class="p-md">Unit</th>
+                  <th class="p-md">Status</th>
+                  <th class="p-md">Expires</th>
+                  <th class="p-md">Pickup Location</th>
+                  <th class="p-md text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody class="body-sm">
+                <tr><td colspan="8" class="p-xl text-center text-mute font-semibold">Loading surplus listings…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Map View Mockup -->
+          <div class="hidden flex-col gap-md" id="browseMapView">
+            <div class="w-full h-[400px] rounded-xl border border-canvas-soft/80 relative overflow-hidden shadow-inner z-10">
+              <!-- Leaflet Map Container -->
+              <div id="map" class="w-full h-full z-10" style="background-color: #f0f3eb;"></div>
+
+              <!-- Map Overlay instructions -->
+              <div class="absolute bottom-md left-md bg-canvas/95 backdrop-blur-md p-md rounded-xl border border-ink/5 shadow-md flex flex-col gap-xs text-[11px] max-w-[220px] z-[1000] select-none pointer-events-none">
+                <strong class="font-bold text-ink flex items-center gap-xs">📍 Interactive Map</strong>
+                <span class="text-mute leading-relaxed">Pins indicate available food rescue items. Click on any pin to view details and coordinate a pickup.</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Food Details Modal -->
+      <!-- Food Details Modal -->
+      <div id="foodModal" class="hidden fixed inset-0 w-full h-full bg-ink/70 z-50 items-center justify-center p-md backdrop-blur-sm transition-all duration-300">
+        <div class="bg-canvas rounded-xl max-w-[512px] w-full p-xl shadow-2xl relative border border-canvas/20 flex flex-col gap-md animate-fadeIn">
+          <button onclick="closeFoodModal()" class="absolute top-md right-md w-8 h-8 rounded-full bg-canvas-soft/40 hover:bg-canvas-soft/80 flex items-center justify-center text-xl text-mute hover:text-ink cursor-pointer border-none transition-colors" aria-label="Close details modal">×</button>
+          <div id="foodModalContent" class="flex flex-col gap-md text-sm">
+            <!-- Dynamic Modal Content -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. My Posts Section -->
+      <section id="myposts" class="tab-content hidden animate-fadeIn">
+        <div class="bg-canvas border border-ink/5 rounded-xl p-xl shadow-sm">
+          <h2 class="display-xs text-ink font-black border-b border-canvas-soft pb-sm mb-lg text-wrap-balance">My Food Listings</h2>
+          <div id="myPostsMsg" class="hidden p-md rounded-xl text-sm font-bold leading-relaxed mb-md"></div>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse" id="myPostsTable">
+              <thead>
+                <tr class="bg-ink text-canvas-soft border-b border-ink/10 text-xs font-bold uppercase select-none">
+                  <th class="p-md">Food Name</th>
+                  <th class="p-md">Category</th>
+                  <th class="p-md">Quantity</th>
+                  <th class="p-md">Unit</th>
+                  <th class="p-md">Status</th>
+                  <th class="p-md">Expires</th>
+                  <th class="p-md text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody class="body-sm">
+                <tr><td colspan="7" class="p-xl text-center text-mute font-semibold">Loading your posts…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. History Section -->
+      <section id="history" class="tab-content hidden animate-fadeIn">
+        <div class="bg-canvas border border-ink/5 rounded-xl p-xl shadow-sm">
+          <h2 class="display-xs text-ink font-black border-b border-canvas-soft pb-sm mb-lg text-wrap-balance">Donation History</h2>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse" id="historyTable">
+              <thead>
+                <tr class="bg-ink text-canvas-soft border-b border-ink/10 text-xs font-bold uppercase select-none">
+                  <th class="p-md">Date</th>
+                  <th class="p-md">Food Details</th>
+                  <th class="p-md">Recipient</th>
+                  <th class="p-md">Quantity</th>
+                  <th class="p-md">Handshake Code</th>
+                  <th class="p-md">Status</th>
+                </tr>
+              </thead>
+              <tbody class="body-sm">
+                <tr class="hover:bg-canvas-soft/20 border-b border-canvas-soft">
+                  <td class="p-md font-semibold text-mute tabular-nums">2026-06-08</td>
+                  <td class="p-md font-bold text-ink">Biryani servings</td>
+                  <td class="p-md">Shelter House Delhi</td>
+                  <td class="p-md tabular-nums">50 meals</td>
+                  <td class="p-md"><span class="bg-primary-pale text-positive-deep px-sm py-[2px] rounded-md font-bold text-xs border border-primary/20 tabular-nums">FB-3982 (Verified)</span></td>
+                  <td class="p-md"><span class="bg-primary-pale text-positive-deep px-md py-xs rounded-full font-bold text-xs select-none">Completed</span></td>
+                </tr>
+                <tr class="hover:bg-canvas-soft/20 border-b border-canvas-soft">
+                  <td class="p-md font-semibold text-mute tabular-nums">2026-06-05</td>
+                  <td class="p-md font-bold text-ink">Fresh Butter Cookies</td>
+                  <td class="p-md">Care NGO India</td>
+                  <td class="p-md tabular-nums">15 kg</td>
+                  <td class="p-md"><span class="bg-primary-pale text-positive-deep px-sm py-[2px] rounded-md font-bold text-xs border border-primary/20 tabular-nums">FB-9204 (Verified)</span></td>
+                  <td class="p-md"><span class="bg-primary-pale text-positive-deep px-md py-xs rounded-full font-bold text-xs select-none">Completed</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Profile Section -->
+      <section id="profile" class="tab-content hidden animate-fadeIn">
+        <div class="bg-canvas border border-ink/5 rounded-xl p-xl shadow-sm">
+          <div class="flex justify-between items-center border-b border-canvas-soft pb-sm mb-lg">
+            <h2 class="display-xs text-ink font-black text-wrap-balance">Organization Profile</h2>
+            <button class="bg-canvas-soft border border-ink/15 text-ink hover:bg-primary-pale transition-all duration-200 rounded-xl px-xl py-sm text-sm font-bold cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" id="editProfileBtn" onclick="toggleProfileEdit()">
+              Edit Profile
+            </button>
+          </div>
+          
+          <div id="profileMsg" class="hidden p-md rounded-xl text-sm font-bold leading-relaxed mb-md"></div>
+
+          <!-- View Profile Box -->
+          <div id="viewProfile" class="block">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-md bg-canvas-soft/40 p-lg rounded-xl border border-canvas-soft/30 select-text">
+              <div class="p-md bg-canvas rounded-lg shadow-xs border border-canvas-soft">
+                <div class="caption text-mute font-bold mb-[2px] select-none">Unique Account ID</div>
+                <div class="body-md-strong text-ink tabular-nums" id="viewUserId">--</div>
+              </div>
+              <div class="p-md bg-canvas rounded-lg shadow-xs border border-canvas-soft">
+                <div class="caption text-mute font-bold mb-[2px] select-none">Account Type</div>
+                <div class="body-md-strong text-ink" id="viewUserTypeDetails">--</div>
+              </div>
+              <div class="p-md bg-canvas rounded-lg shadow-xs border border-canvas-soft">
+                <div class="caption text-mute font-bold mb-[2px] select-none" id="orgNameLabel">Organization Name</div>
+                <div class="body-md-strong text-positive-deep font-black" id="viewOrgName">Not Set</div>
+              </div>
+              <div class="p-md bg-canvas rounded-lg shadow-xs border border-canvas-soft">
+                <div class="caption text-mute font-bold mb-[2px] select-none">Contact Email</div>
+                <div class="body-md-strong text-ink" id="viewEmail">Not Set</div>
+              </div>
+              <div class="p-md bg-canvas rounded-lg shadow-xs border border-canvas-soft">
+                <div class="caption text-mute font-bold mb-[2px] select-none">Phone Number</div>
+                <div class="body-md-strong text-ink tabular-nums" id="viewPhone">Not Set</div>
+              </div>
+              <div class="p-md bg-canvas rounded-lg shadow-xs border border-canvas-soft">
+                <div class="caption text-mute font-bold mb-[2px] select-none">Pickup/Office Address</div>
+                <div class="body-md-strong text-ink" id="viewAddress">Not Set</div>
+              </div>
+              <div class="p-md bg-canvas rounded-lg shadow-xs border border-canvas-soft md:col-span-2">
+                <div class="caption text-mute font-bold mb-[2px] select-none">About Organization</div>
+                <div class="body-md-strong text-ink leading-relaxed" id="viewDescription">Not Set</div>
+              </div>
+            </div>
+            <p class="body-sm text-mute leading-relaxed mt-lg select-none">
+              Thank you for being part of FoodBridge! Together, we’re making a difference by reducing food waste and feeding communities in need.
+            </p>
+          </div>
+
+          <!-- Edit Profile Box -->
+          <div id="editProfile" class="hidden">
+            <form id="profileForm" class="grid grid-cols-1 md:grid-cols-2 gap-lg" autocomplete="off">
+              <div class="flex flex-col gap-xs">
+                <label id="orgNameEditLabel" for="editOrgName" class="body-sm-strong text-ink">Organization Name *</label>
+                <input type="text" id="editOrgName" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary" placeholder="e.g., Shelter House Delhi…" required>
+              </div>
+
+              <div class="flex flex-col gap-xs">
+                <label for="editEmail" class="body-sm-strong text-ink">Contact Email *</label>
+                <input type="email" id="editEmail" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary" placeholder="e.g., contact@example.com…" autocomplete="email" spellcheck="false" required>
+              </div>
+
+              <div class="flex flex-col gap-xs">
+                <label for="editPhone" class="body-sm-strong text-ink">Phone Number *</label>
+                <input type="text" id="editPhone" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary" placeholder="e.g., +91 98765 43210…" autocomplete="tel" required>
+              </div>
+
+              <div class="flex flex-col gap-xs">
+                <label for="editAddress" class="body-sm-strong text-ink">Address *</label>
+                <input type="text" id="editAddress" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary" placeholder="e.g., 123 Street Name, City…" autocomplete="street-address" required>
+              </div>
+
+              <div class="flex flex-col gap-xs md:col-span-2">
+                <label for="editDescription" class="body-sm-strong text-ink">Description/About Us</label>
+                <textarea id="editDescription" class="bg-canvas text-ink border border-ink/20 rounded-xl p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 h-24 focus-visible:ring-2 focus-visible:ring-primary" placeholder="Tell us about your organization and services…"></textarea>
+              </div>
+
+              <button type="submit" id="profileSubmitBtn" class="bg-primary text-on-primary hover:bg-primary-active transition-all duration-200 rounded-xl py-md text-base font-bold shadow-md shadow-primary/10 md:col-span-2 cursor-pointer flex items-center justify-center gap-sm focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
+                <span id="profileBtnSpinner" class="hidden animate-spin rounded-full h-4 w-4 border-2 border-on-primary border-t-transparent"></span>
+                <span id="profileBtnText">Save Changes 💾</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Chats Section -->
+      <section id="chats" class="tab-content hidden animate-fadeIn">
+        <div class="bg-canvas border border-ink/5 rounded-xl p-md md:p-xl shadow-sm flex flex-col lg:flex-row gap-lg min-h-[600px] h-[calc(100vh-200px)] overflow-hidden">
+          
+          <!-- Chats Sidebar: list of claims -->
+          <div class="w-full lg:w-1/3 flex flex-col border-r border-canvas-soft/80 pr-none lg:pr-lg overflow-y-auto min-h-[200px] lg:min-h-0">
+            <h3 class="body-md-strong text-ink font-bold border-b border-canvas-soft pb-sm mb-md flex items-center justify-between">
+              <span>Conversations</span>
+              <span class="bg-primary text-on-primary px-sm py-[2px] rounded-full text-xs font-semibold" id="chatCount">0</span>
+            </h3>
+            <div id="chatsListContainer" class="flex flex-col gap-sm">
+              <div class="text-center text-mute py-xl font-semibold">Loading conversations...</div>
+            </div>
+          </div>
+
+          <!-- Chat Window: message log and input -->
+          <div class="w-full lg:w-2/3 flex flex-col h-full min-h-[400px] lg:min-h-0 relative">
+            <div id="chatRoomEmptyState" class="flex-1 flex flex-col items-center justify-center text-center p-xl bg-canvas-soft/10 rounded-xl border border-dashed border-ink/10 select-none">
+              <span class="text-5xl mb-md">💬</span>
+              <h4 class="body-md-strong text-ink font-bold mb-xs">Select a Conversation</h4>
+              <p class="caption text-mute max-w-[280px]">Choose an active donation pickup listing on the left to coordinate coordinates and pickup details with your partner.</p>
+            </div>
+
+            <div id="chatRoomActiveState" class="hidden flex-1 flex flex-col h-full overflow-hidden">
+              <!-- Header -->
+              <div class="flex items-center justify-between border-b border-canvas-soft pb-sm mb-md">
+                <div>
+                  <h4 id="chatPartnerName" class="body-md-strong text-ink font-black">Counterpart Name</h4>
+                  <div class="flex items-center gap-xs mt-[2px]">
+                    <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    <span id="chatFoodTitle" class="caption text-mute font-medium text-[11px]">Food Item Name</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-md">
+                  <a id="chatPartnerPhone" href="#" class="w-9 h-9 rounded-xl bg-canvas-soft hover:bg-primary-pale text-ink flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" title="Call partner">📞</a>
+                  <a id="chatPartnerEmail" href="#" class="w-9 h-9 rounded-xl bg-canvas-soft hover:bg-primary-pale text-ink flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" title="Email partner">✉️</a>
+                </div>
+              </div>
+
+              <!-- Message History (scrollable container) -->
+              <div id="chatHistoryContainer" class="flex-1 overflow-y-auto pr-sm flex flex-col gap-md mb-md bg-canvas-soft/5 p-md rounded-xl border border-canvas-soft/20 h-[calc(100%-150px)]">
+                <!-- Messages populated dynamically -->
+              </div>
+
+              <!-- Input form -->
+              <form id="chatSendForm" class="flex gap-sm items-center relative" autocomplete="off">
+                <input type="text" id="chatMessageInput" class="bg-canvas text-ink border border-ink/20 rounded-xl px-md py-md body-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all w-full pr-[60px]" placeholder="Type your coordinate instructions, pickup ETA, or question..." required>
+                <button type="submit" class="absolute right-[6px] w-10 h-10 rounded-lg bg-primary text-on-primary hover:bg-primary-active flex items-center justify-center transition-colors shadow-sm focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none shrink-0" aria-label="Send Message">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Client-Side Dashboard Scripting -->
+  <script is:inline>
+    const API_STORAGE_KEY = 'foodbridge_api_url';
+    const DEFAULT_REMOTE_API_URL = 'https://foodbridge.online/api';
+
+    let leafletMap = null;
+    let mapMarkersGroup = null;
+    let activeOrderId = null;
+    let activeChatPollInterval = null;
+
+    function normalizeApiUrl(url) {
+      return String(url || '').trim().replace(/\/+$/, '');
+    }
+
+    function isLocalHost(host) {
+      return /^(127\.0\.0\.1|localhost|0\.0\.0\.0|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})$/.test(host);
+    }
+
+    function getStoredApiUrl() {
+      return normalizeApiUrl(sessionStorage.getItem(API_STORAGE_KEY));
+    }
+
+    function rememberApiUrl(url) {
+      const normalized = normalizeApiUrl(url);
+      if (!normalized) return;
+      sessionStorage.setItem(API_STORAGE_KEY, normalized);
+    }
+
+    function resolveApiBaseUrl() {
+      const fromQuery = new URLSearchParams(window.location.search).get('api');
+      const fromGlobal = window.FOODBRIDGE_API_URL;
+      const host = window.location.hostname || 'localhost';
+      const isLocal = isLocalHost(host) || window.location.protocol === 'file:';
+      const fallback = isLocal ? `http://${host}:5001/api` : '/api';
+      return normalizeApiUrl(fromQuery || fromGlobal || getStoredApiUrl() || fallback);
+    }
+
+    let API_URL = resolveApiBaseUrl();
+    const API_DEBUG_BADGE_ID = 'apiDebugBadge';
+
+    function getApiCandidates() {
+      const host = window.location.hostname || 'localhost';
+      const isLocal = isLocalHost(host) || window.location.protocol === 'file:';
+      const candidates = [
+        !isLocal ? '/api' : '',
+        normalizeApiUrl(new URLSearchParams(window.location.search).get('api')),
+        normalizeApiUrl(window.FOODBRIDGE_API_URL),
+        getStoredApiUrl(),
+        isLocal ? `http://${host}:5001/api` : '',
+        isLocal ? 'http://localhost:5001/api' : '',
+        isLocal ? 'http://127.0.0.1:5001/api' : '',
+        API_URL,
+        !isLocal ? DEFAULT_REMOTE_API_URL : ''
+      ].filter(Boolean);
+      return [...new Set(candidates)];
+    }
+
+    function buildApiUrl(base, path) {
+      const normalizedBase = normalizeApiUrl(base);
+      const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+      return `${normalizedBase}${normalizedPath}`;
+    }
+
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 45000) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await fetch(url, { ...options, signal: controller.signal });
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    async function apiFetch(path, options = {}, timeoutMs = 45000) {
+      const candidates = getApiCandidates();
+      let lastError = null;
+
+      for (const base of candidates) {
+        try {
+          const response = await fetchWithTimeout(buildApiUrl(base, path), options, timeoutMs);
+          const contentType = response.headers.get('content-type') || '';
+          const looksLikeHtml = contentType.includes('text/html');
+
+          if (response.status === 404 && looksLikeHtml) continue;
+          if (looksLikeHtml) continue;
+
+          API_URL = normalizeApiUrl(base);
+          rememberApiUrl(API_URL);
+          renderApiBadge();
+          return response;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      console.error('API candidates tried:', candidates, 'lastError:', lastError);
+      if (lastError) throw lastError;
+      throw new Error('No reachable API endpoint');
+    }
+
+    async function parseJsonResponse(response) {
+      try {
+        return await response.json();
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function renderApiBadge() {
+      let badge = document.getElementById(API_DEBUG_BADGE_ID);
+      if (!badge) {
+        badge = document.createElement('div');
+        badge.id = API_DEBUG_BADGE_ID;
+        badge.style.cssText = 'position:fixed;right:14px;bottom:14px;background:#ffffff;border:1px solid #0e0f0c;color:#0e0f0c;padding:8px 12px;border-radius:12px;font-size:11px;z-index:3000;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,0.06);';
+        document.body.appendChild(badge);
+      }
+      badge.textContent = `API: ${API_URL}`;
+    }
+
+    // Toggle Map/List View
+    window.toggleBrowseView = function(viewType) {
+      const listEl = document.getElementById('browseListView');
+      const mapEl = document.getElementById('browseMapView');
+      const listBtn = document.getElementById('viewListBtn');
+      const mapBtn = document.getElementById('viewMapBtn');
+
+      if (viewType === 'list') {
+        listEl.classList.remove('hidden');
+        mapEl.classList.add('hidden');
+        listBtn.className = "py-[6px] px-lg rounded-lg text-xs font-bold bg-canvas text-ink shadow-sm border border-ink/5 cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none";
+        mapBtn.className = "py-[6px] px-lg rounded-lg text-xs font-bold text-mute hover:text-ink hover:bg-canvas/40 cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none";
+      } else {
+        listEl.classList.add('hidden');
+        mapEl.classList.remove('hidden');
+        mapEl.className = "flex flex-col gap-md animate-fadeIn";
+        listBtn.className = "py-[6px] px-lg rounded-lg text-xs font-bold text-mute hover:text-ink hover:bg-canvas/40 cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none";
+        mapBtn.className = "py-[6px] px-lg rounded-lg text-xs font-bold bg-canvas text-ink shadow-sm border border-ink/5 cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none";
+        
+        // Render Leaflet map
+        if (window.currentFoodListings) {
+          generateMapPins(window.currentFoodListings);
+        }
+        if (leafletMap) {
+          setTimeout(() => {
+            leafletMap.invalidateSize();
+          }, 100);
+        }
+      }
+    };
+
+    // Tab switcher
+    window.switchTab = function(tab) {
+      // Clear any active message polling interval
+      if (activeChatPollInterval) {
+        clearInterval(activeChatPollInterval);
+        activeChatPollInterval = null;
+      }
+
+      document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
+      document.getElementById(tab).classList.remove('hidden');
+      
+      document.querySelectorAll('#sidebarNav button').forEach(btn => {
+        btn.className = "w-full text-left py-md px-lg rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer text-canvas-soft/60 hover:text-white hover:bg-canvas-soft/5 dark:text-body/60 dark:hover:text-ink dark:hover:bg-body/5 flex items-center gap-sm group focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none";
+      });
+
+      const activeBtn = document.getElementById(`nav-${tab}`);
+      if (activeBtn) {
+        activeBtn.className = "w-full text-left py-md px-lg rounded-xl font-bold text-sm transition-all duration-200 cursor-pointer text-on-primary bg-primary flex items-center gap-sm shadow-lg shadow-primary/10 group focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none";
+      }
+
+      if (tab === 'chats') {
+        loadChatsList();
+        // Reset state
+        activeOrderId = null;
+        lastFetchedMessageCount = 0;
+        document.getElementById('chatRoomEmptyState').style.display = 'flex';
+        document.getElementById('chatRoomActiveState').classList.add('hidden');
+        document.getElementById('chatRoomActiveState').style.display = 'none';
+      }
+
+      // Set Page Title
+      const titleMap = {
+        overview: 'Dashboard Overview',
+        post: 'Post Surplus Food',
+        browse: 'Browse Surplus Food',
+        myposts: 'My Listings',
+        history: 'Donation History',
+        chats: 'Pickup Coordination Chat',
+        profile: 'Organization Profile'
+      };
+      document.getElementById('pageTitle').textContent = titleMap[tab] || 'Dashboard';
+
+      // Collapse mobile menu if open
+      const wrapper = document.getElementById('mobileNavWrapper');
+      if (wrapper && !wrapper.classList.contains('hidden') && window.innerWidth < 1024) {
+        wrapper.classList.add('hidden');
+      }
+    };
+
+    window.toggleMobileMenu = function() {
+      const wrapper = document.getElementById('mobileNavWrapper');
+      if (wrapper) {
+        wrapper.classList.toggle('hidden');
+      }
+    };
+
+    window.toggleProfileEdit = function() {
+      const viewProfile = document.getElementById('viewProfile');
+      const editProfile = document.getElementById('editProfile');
+      const btn = document.getElementById('editProfileBtn');
+
+      if (editProfile.classList.contains('hidden')) {
+        viewProfile.classList.add('hidden');
+        editProfile.classList.remove('hidden');
+        btn.textContent = 'Cancel';
+        btn.className = "bg-negative/10 hover:bg-negative-deep text-negative border border-negative/20 transition-all duration-200 rounded-xl px-xl py-sm text-sm font-bold cursor-pointer focus-visible:ring-2 focus-visible:ring-negative focus-visible:outline-none";
+      } else {
+        viewProfile.classList.remove('hidden');
+        editProfile.classList.add('hidden');
+        btn.textContent = 'Edit Profile';
+        btn.className = "bg-canvas-soft border border-ink/15 text-ink hover:bg-primary-pale border border-transparent transition-all duration-200 rounded-xl px-xl py-sm text-sm font-bold cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none";
+      }
+    };
+
+    function showMsg(text, type, elemId) {
+      const msg = document.getElementById(elemId);
+      msg.textContent = text;
+      msg.className = `p-md rounded-xl text-sm font-bold leading-relaxed mb-md ${
+        type === 'success' ? 'bg-primary-pale text-positive-deep border border-positive/20' : 'bg-negative-bg text-negative border border-negative/20'
+      }`;
+      msg.classList.remove('hidden');
+      setTimeout(() => msg.classList.add('hidden'), 5000);
+    }
+
+    let localClaims = {};
+
+    async function syncClaimsFromDB() {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      const userType = localStorage.getItem('userType') || '';
+      const isNGO = userType.toLowerCase().includes('ngo');
+
+      if (!token || !userId) return;
+
+      try {
+        let res;
+        if (isNGO) {
+          res = await apiFetch(`/orders/ngo/${userId}`);
+        } else {
+          res = await apiFetch(`/orders/restaurant/${userId}`);
+        }
+        
+        const orders = await parseJsonResponse(res);
+        if (res.ok && Array.isArray(orders)) {
+          localClaims = {};
+          orders.forEach(order => {
+            if (order.status === 'pending' && order.food) {
+              localClaims[order.food._id] = {
+                orderId: order._id,
+                handshakeCode: order.handshakeCode,
+                claimedAt: order.createdAt,
+                partner: isNGO 
+                  ? (order.food.postedBy || {})
+                  : (order.ngo || {})
+              };
+            }
+          });
+          
+          if (isNGO) {
+            document.getElementById('metricMyPosts').textContent = Object.keys(localClaims).length;
+          }
+        }
+      } catch (err) {
+        console.log('Error syncing claims from DB:', err);
+      }
+    }
+
+    window.claimFoodItem = async function(foodId) {
+      const confirmed = window.confirm('Are you sure you want to claim this surplus food item for pickup?');
+      if (!confirmed) return;
+
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+
+      try {
+        const res = await apiFetch('/orders', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify({ food: foodId, ngo: userId })
+        });
+
+        const order = await parseJsonResponse(res);
+        if (res.ok && order) {
+          showMsg('✓ Food item claimed successfully! Coordination details unlocked.', 'success', 'browseMsg');
+          await syncClaimsFromDB();
+          await loadBrowseFood();
+        } else {
+          showMsg(`✗ ${order?.message || 'Failed to claim food item'}`, 'error', 'browseMsg');
+        }
+      } catch (err) {
+        showMsg('✗ Unable to reach the server for claiming.', 'error', 'browseMsg');
+      }
+    };
+
+    window.releaseFoodItem = async function(foodId) {
+      const confirmed = window.confirm('Are you sure you want to release this claimed food item back to active browse?');
+      if (!confirmed) return;
+
+      const token = localStorage.getItem('token');
+
+      try {
+        const res = await apiFetch(`/orders/food/${foodId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const result = await parseJsonResponse(res);
+        if (res.ok) {
+          showMsg('✓ Claim released successfully.', 'success', 'browseMsg');
+          await syncClaimsFromDB();
+          await loadBrowseFood();
+        } else {
+          showMsg(`✗ ${result?.message || 'Failed to release claim'}`, 'error', 'browseMsg');
+        }
+      } catch (err) {
+        showMsg('✗ Unable to reach the server for releasing claim.', 'error', 'browseMsg');
+      }
+    };
+
+    window.completeVerification = async function(foodId, enteredCode) {
+      const token = localStorage.getItem('token');
+
+      try {
+        const res = await apiFetch('/orders/verify', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify({ foodId, handshakeCode: enteredCode })
+        });
+
+        const result = await parseJsonResponse(res);
+        if (res.ok) {
+          alert('✓ Verification Success! Donation status marked as Completed.');
+          closeFoodModal();
+          await syncClaimsFromDB();
+          await loadBrowseFood();
+          await loadHistory();
+        } else {
+          alert(`✗ Verification failed: ${result?.message || 'Invalid code'}`);
+        }
+      } catch (err) {
+        alert('✗ Error confirming handshake with server.');
+      }
+    };
+
+    async function loadHistory() {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      const userType = localStorage.getItem('userType') || '';
+      const isNGO = userType.toLowerCase().includes('ngo');
+
+      if (!token || !userId) return;
+
+      const tbody = document.querySelector('#historyTable tbody');
+      if (!tbody) return;
+
+      try {
+        let res;
+        if (isNGO) {
+          res = await apiFetch(`/orders/ngo/${userId}`);
+        } else {
+          res = await apiFetch(`/orders/restaurant/${userId}`);
+        }
+
+        const orders = await parseJsonResponse(res);
+        if (!res.ok || !Array.isArray(orders)) {
+          throw new Error('History request failed');
+        }
+
+        if (orders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="p-xl text-center text-mute font-semibold">No donation history found.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = orders.map(order => {
+          if (!order.food) return '';
+          
+          const dateStr = new Date(order.createdAt).toLocaleDateString();
+          const foodDetails = order.food.name;
+          const counterpart = isNGO 
+            ? (order.food.postedBy?.orgName || 'Unknown Restaurant')
+            : (order.ngo?.orgName || 'Unknown NGO');
+          
+          const qtyStr = `${order.quantity} ${order.food.unit || 'units'}`;
+          const handshake = `<span class="bg-primary-pale text-positive-deep px-sm py-[2px] rounded-md font-bold text-xs border border-primary/20 tabular-nums">${order.handshakeCode}</span>`;
+          
+          const statusBadge = order.status === 'completed'
+            ? `<span class="bg-primary-pale text-positive-deep px-md py-xs rounded-full font-bold text-xs select-none">Completed</span>`
+            : `<span class="bg-warning-deep/15 text-warning-deep border border-warning/20 px-md py-xs rounded-full font-bold text-xs select-none">Pending Pickup</span>`;
+
+          return `
+            <tr class="hover:bg-canvas-soft/20 border-b border-canvas-soft">
+              <td class="p-md font-semibold text-mute tabular-nums">${dateStr}</td>
+              <td class="p-md font-bold text-ink">${foodDetails}</td>
+              <td class="p-md">${counterpart}</td>
+              <td class="p-md tabular-nums">${qtyStr}</td>
+              <td class="p-md">${handshake}</td>
+              <td class="p-md">${statusBadge}</td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        console.log('Error loading history:', err);
+        tbody.innerHTML = '<tr><td colspan="6" class="p-xl text-center text-mute font-semibold text-negative">Failed to load donation history.</td></tr>';
+      }
+    }
+
+    async function loadProfileData() {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+
+      try {
+        const res = await apiFetch(`/users/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await parseJsonResponse(res);
+
+        if (!res.ok || !data) {
+          throw new Error('Profile request failed');
+        }
+
+        document.getElementById('viewUserId').textContent = userId;
+        document.getElementById('viewOrgName').textContent = data.orgName || 'Not Set';
+        document.getElementById('viewEmail').textContent = data.email || 'Not Set';
+        document.getElementById('viewPhone').textContent = data.phone || 'Not Set';
+        document.getElementById('viewAddress').textContent = data.address || 'Not Set';
+        document.getElementById('viewDescription').textContent = data.description || 'Not Set';
+
+        document.getElementById('editOrgName').value = data.orgName || '';
+        document.getElementById('editEmail').value = data.email || '';
+        document.getElementById('editPhone').value = data.phone || '';
+        document.getElementById('editAddress').value = data.address || '';
+        document.getElementById('editDescription').value = data.description || '';
+      } catch (err) {
+        console.log('Profile loading error:', err);
+      }
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+
+      const submitBtn = document.getElementById('profileSubmitBtn');
+      const btnSpinner = document.getElementById('profileBtnSpinner');
+      const btnText = document.getElementById('profileBtnText');
+
+      submitBtn.disabled = true;
+      btnSpinner.classList.remove('hidden');
+      btnText.textContent = 'Saving…';
+
+      const data = {
+        orgName: document.getElementById('editOrgName').value,
+        email: document.getElementById('editEmail').value,
+        phone: document.getElementById('editPhone').value,
+        address: document.getElementById('editAddress').value,
+        description: document.getElementById('editDescription').value
+      };
+
+      try {
+        const res = await apiFetch(`/users/${userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+          showMsg('✓ Profile updated successfully!', 'success', 'profileMsg');
+          setTimeout(() => {
+            loadProfileData();
+            toggleProfileEdit();
+          }, 1500);
+        } else {
+          showMsg('✗ Failed to update profile', 'error', 'profileMsg');
+        }
+      } catch (err) {
+        showMsg(`✗ Unable to reach the server at ${API_URL}`, 'error', 'profileMsg');
+      } finally {
+        submitBtn.disabled = false;
+        btnSpinner.classList.add('hidden');
+        btnText.textContent = 'Save Changes 💾';
+      }
+    });
+
+    document.getElementById('postForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem('token');
+      const latitude = parseFloat(document.getElementById('pickupLatitude').value);
+      const longitude = parseFloat(document.getElementById('pickupLongitude').value);
+
+      if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
+        showMsg('✗ Please enter valid pickup coordinates', 'error', 'postMsg');
+        return;
+      }
+
+      const submitBtn = document.getElementById('postSubmitBtn');
+      const btnSpinner = document.getElementById('postBtnSpinner');
+      const btnText = document.getElementById('postBtnText');
+
+      submitBtn.disabled = true;
+      btnSpinner.classList.remove('hidden');
+      btnText.textContent = 'Posting Details…';
+
+      const data = {
+        name: document.getElementById('foodName').value,
+        category: document.getElementById('foodCategory').value,
+        quantity: parseInt(document.getElementById('foodQty').value),
+        unit: document.getElementById('foodUnit').value,
+        description: document.getElementById('foodDesc').value,
+        expiryTime: parseInt(document.getElementById('foodExpiry').value),
+        latitude,
+        longitude
+      };
+
+      try {
+        const res = await apiFetch('/food', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(data)
+        });
+
+        const result = await parseJsonResponse(res);
+        if (res.ok) {
+          const addressLine = result?.pickupLocation?.addressSentence ? ` ${result.pickupLocation.addressSentence}` : '';
+          showMsg(`✓ Food posted successfully!${addressLine}`, 'success', 'postMsg');
+          document.getElementById('postForm').reset();
+          document.getElementById('pickupPreview').textContent = 'Pickup address sentence will be auto-generated from these coordinates when you post.';
+          
+          // Re-calculate gamified impact CO2 values
+          const curCo2 = parseFloat(document.getElementById('metricCo2Saved').textContent) || 0;
+          document.getElementById('metricCo2Saved').textContent = (curCo2 + data.quantity * 2.5).toFixed(1);
+
+          loadBrowseFood();
+          setTimeout(() => loadMyPosts(), 1000);
+        } else {
+          showMsg(`✗ ${result.message || 'Failed to post'}`, 'error', 'postMsg');
+        }
+      } catch (err) {
+        showMsg(`✗ Unable to reach the server at ${API_URL}`, 'error', 'postMsg');
+      } finally {
+        submitBtn.disabled = false;
+        btnSpinner.classList.add('hidden');
+        btnText.textContent = 'Post Details 🚀';
+      }
+    });
+
+    // Define interactive detail popup helper for Leaflet markers
+    window.showFoodModalFromMap = function(id) {
+      if (window.currentFoodListings) {
+        const f = window.currentFoodListings.find(item => item._id === id);
+        if (f) showFoodModal(f);
+      }
+    };
+
+    // Render interactive Leaflet Map pins based on real coordinates
+    function generateMapPins(foods) {
+      if (typeof L === 'undefined') {
+        console.warn('Leaflet mapping library not loaded yet.');
+        return;
+      }
+
+      const defaultLat = 12.9716;
+      const defaultLng = 77.5946;
+
+      // Define custom Wise-themed SVG/HTML marker icons
+      const activeIcon = L.divIcon({
+        className: 'custom-leaflet-marker',
+        html: `
+          <div class="relative flex items-center justify-center">
+            <span class="absolute inline-flex h-10 w-10 rounded-full bg-primary/30 animate-ping"></span>
+            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-primary-active border-2 border-canvas shadow-md flex items-center justify-center text-sm select-none">
+              🍽️
+            </div>
+          </div>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+      });
+
+      const claimedIcon = L.divIcon({
+        className: 'custom-leaflet-marker',
+        html: `
+          <div class="relative flex items-center justify-center">
+            <span class="absolute inline-flex h-10 w-10 rounded-full bg-accent-orange/30 animate-ping"></span>
+            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-accent-orange to-accent-orange/80 border-2 border-canvas shadow-md flex items-center justify-center text-sm select-none">
+              🤝
+            </div>
+          </div>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+      });
+
+      const centerIcon = L.divIcon({
+        className: 'custom-leaflet-marker',
+        html: `
+          <div class="relative flex items-center justify-center">
+            <span class="absolute inline-flex h-12 w-12 rounded-full bg-accent-cyan/20 animate-ping"></span>
+            <div class="w-6 h-6 rounded-full bg-accent-cyan border-2 border-canvas shadow-lg"></div>
+          </div>
+        `,
+        iconSize: [48, 48],
+        iconAnchor: [24, 24]
+      });
+
+      // Initialize map once
+      if (!leafletMap) {
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) return;
+
+        leafletMap = L.map('map', {
+          center: [defaultLat, defaultLng],
+          zoom: 13,
+          zoomControl: true
+        });
+
+        // Add clean OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(leafletMap);
+
+        // Layer group to hold listings
+        mapMarkersGroup = L.layerGroup().addTo(leafletMap);
+
+        // Position current user location
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const uLat = position.coords.latitude;
+              const uLng = position.coords.longitude;
+              leafletMap.setView([uLat, uLng], 13);
+              L.marker([uLat, uLng], { icon: centerIcon })
+                .bindPopup('<strong class="font-bold">Your NGO Center</strong>')
+                .addTo(leafletMap);
+            },
+            () => {
+              L.marker([defaultLat, defaultLng], { icon: centerIcon })
+                .bindPopup('<strong class="font-bold">Your NGO Center</strong>')
+                .addTo(leafletMap);
+            }
+          );
+        } else {
+          L.marker([defaultLat, defaultLng], { icon: centerIcon })
+            .bindPopup('<strong class="font-bold">Your NGO Center</strong>')
+            .addTo(leafletMap);
+        }
+      }
+
+      // Clear existing markers
+      mapMarkersGroup.clearLayers();
+
+      // Plot available food listing coordinates
+      if (Array.isArray(foods)) {
+        foods.forEach((f) => {
+          const lat = f.pickupLocation?.latitude;
+          const lng = f.pickupLocation?.longitude;
+          if (!lat || !lng) return;
+
+          const isClaimed = localClaims[f._id] !== undefined;
+          const marker = L.marker([lat, lng], {
+            icon: isClaimed ? claimedIcon : activeIcon
+          });
+
+          // Bind Leaflet HTML popup to listing info
+          marker.bindPopup(`
+            <div class="p-xs flex flex-col gap-xxs font-inter text-xs leading-tight min-w-[150px]">
+              <strong class="text-ink text-sm font-bold">${f.name}</strong>
+              <span class="text-mute">${f.quantity} ${f.unit} &bull; ${f.category}</span>
+              <span class="font-bold mt-xs px-sm py-[2px] rounded inline-block text-center text-[10px] uppercase select-none ${isClaimed ? 'bg-accent-orange/25 text-[#7f1d1d]' : 'bg-[#e2f6d5] text-[#054d28]' }">
+                ${isClaimed ? 'Claimed' : 'Available'}
+              </span>
+              <button onclick="window.showFoodModalFromMap('${f._id}')" class="mt-sm bg-ink text-canvas-soft rounded-lg py-xs px-md text-[10px] font-bold cursor-pointer hover:bg-primary hover:text-ink transition-colors border-none w-full text-center">
+                View Details &rarr;
+              </button>
+            </div>
+          `);
+
+          marker.addTo(mapMarkersGroup);
+        });
+      }
+    }
+
+    async function loadBrowseFood() {
+      const userType = localStorage.getItem('userType') || '';
+      const isNGO = userType.toLowerCase().includes('ngo');
+      const userId = localStorage.getItem('userId');
+
+      try {
+        await syncClaimsFromDB();
+
+        const res = await apiFetch('/food');
+        const activeFoods = await parseJsonResponse(res);
+
+        if (!res.ok || !Array.isArray(activeFoods)) {
+          throw new Error('Food list request failed');
+        }
+
+        let foods = [...activeFoods];
+
+        // NGO needs to see their claimed pending food items in this list too
+        if (isNGO && userId) {
+          try {
+            const resOrders = await apiFetch(`/orders/ngo/${userId}`);
+            const orders = await parseJsonResponse(resOrders);
+            if (resOrders.ok && Array.isArray(orders)) {
+              orders.forEach(order => {
+                if (order.status === 'pending' && order.food) {
+                  if (!foods.some(f => f._id === order.food._id)) {
+                    foods.push(order.food);
+                  }
+                }
+              });
+            }
+          } catch (err) {
+            console.log('Error merging claimed items:', err);
+          }
+        }
+
+        document.getElementById('metricActivePosts').textContent = activeFoods.length;
+        document.getElementById('metricPickupReady').textContent = activeFoods
+          ? activeFoods.filter(f => f.pickupLocation && (f.pickupLocation.addressSentence || (f.pickupLocation.latitude && f.pickupLocation.longitude))).length
+          : 0;
+
+        // Store listings cache globally for map access
+        window.currentFoodListings = foods;
+
+        // Generate Map Pins
+        generateMapPins(foods);
+
+        const tbody = document.querySelector('#browseTable tbody');
+        if (!foods || foods.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" class="p-xl text-center text-mute font-semibold">No food items available at this moment.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = foods.map((f) => {
+          const isClaimed = localClaims[f._id] !== undefined;
+          const statusText = isClaimed ? 'Claimed' : f.status;
+          
+          // Compute expiry time indicator
+          const hoursLeft = Number(f.expiryTime);
+          let badgeColorClass = "bg-primary-pale text-positive-deep"; // active
+          if (hoursLeft <= 2) {
+            badgeColorClass = "bg-negative text-canvas"; // urgent - white text on red (high contrast)
+          } else if (hoursLeft <= 4) {
+            badgeColorClass = "bg-accent-orange/20 text-warning-deep"; // warning
+          }
+
+          let actionBtnHtml = '';
+          if (isNGO) {
+            if (isClaimed) {
+              actionBtnHtml = `
+                <button class="bg-negative hover:bg-negative-deep text-canvas py-xs px-sm rounded-lg font-bold text-xs cursor-pointer shadow-xs mr-xs focus-visible:ring-2 focus-visible:ring-negative focus-visible:outline-none" onclick="releaseFoodItem('${f._id}')">
+                  Release
+                </button>
+                <button class="bg-primary text-on-primary hover:bg-primary-active py-xs px-sm rounded-lg font-bold text-xs cursor-pointer shadow-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick='showFoodModal(${JSON.stringify(f)})'>
+                  Details & OTP
+                </button>
+              `;
+            } else {
+              actionBtnHtml = `
+                <button class="bg-primary text-on-primary hover:bg-primary-active py-xs px-sm rounded-lg font-bold text-xs cursor-pointer shadow-xs mr-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick="claimFoodItem('${f._id}')">
+                  Claim
+                </button>
+                <button class="bg-canvas-soft border border-ink text-ink hover:bg-primary-pale py-xs px-sm rounded-lg font-bold text-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick='showFoodModal(${JSON.stringify(f)})'>
+                  Details
+                </button>
+              `;
+            }
+          } else {
+            actionBtnHtml = `
+              <button class="bg-canvas-soft border border-ink text-ink hover:bg-primary-pale py-xs px-sm rounded-lg font-bold text-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick='showFoodModal(${JSON.stringify(f)})'>
+                Details
+              </button>
+            `;
+          }
+
+          return `
+            <tr class="hover:bg-canvas-soft/20 border-b border-canvas-soft">
+              <td class="p-md font-bold text-ink">${f.name}</td>
+              <td class="p-md text-mute select-none">${f.category}</td>
+              <td class="p-md font-semibold tabular-nums">${f.quantity}</td>
+              <td class="p-md select-none">${f.unit}</td>
+              <td class="p-md"><span class="px-sm py-[2px] rounded-full text-xs font-bold select-none border ${isClaimed ? 'bg-warning-deep/15 text-warning-deep border-warning/20' : 'bg-primary-pale text-positive-deep border-primary/25'}">${statusText}</span></td>
+              <td class="p-md"><span class="px-sm py-[2px] rounded-md text-xs font-bold tabular-nums ${badgeColorClass}">${hoursLeft}h</span></td>
+              <td class="p-md text-xs text-body font-medium">${f.pickupLocation?.addressSentence || `Coordinates: ${f.pickupLocation?.latitude?.toFixed(4) || '-'}, ${f.pickupLocation?.longitude?.toFixed(4) || '-'}`}</td>
+              <td class="p-md whitespace-nowrap text-right">${actionBtnHtml}</td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        document.querySelector('#browseTable tbody').innerHTML = '<tr><td colspan="8" class="p-xl text-center text-mute font-semibold">Error loading listings.</td></tr>';
+      }
+    }
+
+    async function loadMyPosts() {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+
+      try {
+        const res = await apiFetch(`/food/restaurant/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const foods = await parseJsonResponse(res);
+
+        if (!res.ok || !Array.isArray(foods)) {
+          throw new Error('My posts request failed');
+        }
+
+        document.getElementById('metricMyPosts').textContent = Array.isArray(foods) ? foods.length : 0;
+
+        // Cumulative CO2 Offset score estimation (approx 2.5 kg CO2 saved per food unit)
+        const totalQty = foods.reduce((sum, f) => sum + (f.quantity || 0), 0);
+        document.getElementById('metricCo2Saved').textContent = (totalQty * 2.5).toFixed(1);
+
+        const tbody = document.querySelector('#myPostsTable tbody');
+        if (!foods || foods.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="p-xl text-center text-mute font-semibold">You haven’t posted any active surplus meals yet.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = foods.map(f => `
+          <tr class="hover:bg-canvas-soft/20 border-b border-canvas-soft">
+            <td class="p-md font-bold text-ink">${f.name}</td>
+            <td class="p-md text-mute select-none">${f.category}</td>
+            <td class="p-md font-semibold tabular-nums">${f.quantity}</td>
+            <td class="p-md select-none">${f.unit}</td>
+            <td class="p-md"><span class="px-sm py-[2px] rounded-full text-xs font-bold border select-none ${f.status === 'Claimed' ? 'bg-warning-deep/15 text-warning-deep border-warning/20' : 'bg-primary-pale text-positive-deep border-primary/25'}">${f.status}</span></td>
+            <td class="p-md font-semibold text-mute tabular-nums">${f.expiryTime}h</td>
+            <td class="p-md text-right">
+              <button class="bg-negative/10 hover:bg-negative/20 text-negative border border-negative/20 py-xs px-sm rounded-lg font-bold text-xs cursor-pointer shadow-xs focus-visible:ring-2 focus-visible:ring-negative focus-visible:outline-none" onclick="deleteFoodPost('${f._id}')">
+                Delete
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        document.querySelector('#myPostsTable tbody').innerHTML = '<tr><td colspan="7" class="p-xl text-center text-mute font-semibold">Error loading posts.</td></tr>';
+      }
+    }
+
+    async function deleteFoodPost(foodId) {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const confirmed = window.confirm('Are you sure you want to delete this food listing?');
+      if (!confirmed) return;
+
+      try {
+        const res = await apiFetch(`/food/${foodId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const result = await parseJsonResponse(res);
+        if (res.ok) {
+          showMsg('✓ Food post deleted successfully', 'success', 'myPostsMsg');
+          loadMyPosts();
+          loadBrowseFood();
+        } else {
+          showMsg(`✗ ${result.message || 'Failed to delete food post'}`, 'error', 'myPostsMsg');
+        }
+      } catch (err) {
+        showMsg(`✗ Unable to reach the server at ${API_URL}`, 'error', 'myPostsMsg');
+      }
+    }
+
+    async function autoRemoveExpiredFood() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        await apiFetch('/food/auto-remove', {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        loadBrowseFood();
+        const userType = localStorage.getItem('userType') || '';
+        if (!userType.toLowerCase().includes('ngo')) loadMyPosts();
+      } catch (err) {
+        console.log('Auto-remove error:', err);
+      }
+    }
+
+    window.logout = function() {
+      localStorage.clear();
+      window.location.href = '/';
+    };
+
+    window.closeFoodModal = function() {
+      document.getElementById('foodModal').style.display = 'none';
+      document.getElementById('foodModal').classList.add('hidden');
+    };
+
+    // Close modal on Escape key press
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeFoodModal();
+      }
+    });
+
+    window.showFoodModal = function(food) {
+      const restInfo = food.postedBy;
+      const locationSentence = food.pickupLocation?.addressSentence || `Pickup is available at coordinates (${food.pickupLocation?.latitude || '-'}, ${food.pickupLocation?.longitude || '-'}).`;
+      const isClaimed = localClaims[food._id] !== undefined;
+
+      let html = `
+        <h2 class="display-xs text-ink font-black border-b border-canvas-soft pb-xs text-wrap-balance">Surplus Listing Details</h2>
+        <div class="grid grid-cols-2 gap-sm my-md">
+          <div><strong class="text-mute text-xs uppercase block select-none">Food Name</strong><span class="font-bold text-ink">${food.name}</span></div>
+          <div><strong class="text-mute text-xs uppercase block select-none">Category</strong><span class="font-medium">${food.category}</span></div>
+          <div><strong class="text-mute text-xs uppercase block select-none">Quantity</strong><span class="font-semibold tabular-nums">${food.quantity} ${food.unit}</span></div>
+          <div><strong class="text-mute text-xs uppercase block select-none">Hours Left</strong><span class="bg-primary-pale text-positive-deep px-sm py-[2px] rounded-md font-bold text-xs tabular-nums">${food.expiryTime}h</span></div>
+          <div class="col-span-2"><strong class="text-mute text-xs uppercase block select-none">Description</strong><p class="body-sm text-body leading-relaxed">${food.description || 'No description provided.'}</p></div>
+          <div class="col-span-2"><strong class="text-mute text-xs uppercase block select-none">Pickup Location</strong><p class="body-sm text-body font-semibold text-accent-orange leading-relaxed">${locationSentence}</p></div>
+          <div class="col-span-2"><strong class="text-mute text-xs uppercase block select-none">Coordinates</strong><code class="text-xs bg-canvas-soft px-sm py-[2px] rounded-md tabular-nums">${food.pickupLocation?.latitude || '-'}, ${food.pickupLocation?.longitude || '-'}</code></div>
+        </div>
+
+        <h3 class="body-md-strong text-ink border-b border-canvas-soft pb-xs mt-lg select-none text-wrap-balance">Restaurant Contact Info</h3>
+      `;
+
+      if (restInfo && restInfo.orgName) {
+        html += `
+          <div class="flex flex-col gap-xs my-md">
+            <div><strong class="text-mute text-xs uppercase block select-none">Business Name</strong><span class="font-bold text-ink">${restInfo.orgName}</span></div>
+            <div><strong class="text-mute text-xs uppercase block select-none">Address</strong><span class="font-medium">${restInfo.address || 'Not Provided'}</span></div>
+            <div class="flex justify-between items-center gap-md">
+              <div><strong class="text-mute text-xs uppercase block select-none">Email</strong><span class="font-medium">${restInfo.email || 'Not Provided'}</span></div>
+              <a href="mailto:${restInfo.email}" class="text-xs font-bold text-accent-orange hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">Email Restaurant</a>
+            </div>
+            <div class="flex justify-between items-center gap-md">
+              <div><strong class="text-mute text-xs uppercase block select-none">Phone Contact</strong><span class="font-bold text-ink tabular-nums">${restInfo.phone || 'Not Provided'}</span></div>
+              <a href="tel:${restInfo.phone}" class="text-xs font-bold text-primary hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">Call Directly</a>
+            </div>
+          </div>
+        `;
+      } else {
+        html += `<div class="my-md text-mute italic select-none">Restaurant contact information not loaded.</div>`;
+      }
+
+      // Claiming / OTP Code Handshake UI Enhancement
+      if (isClaimed) {
+        const claimObj = localClaims[food._id];
+        const partner = claimObj.partner || {};
+        const partnerName = partner.orgName || 'Partner';
+        const partnerPhone = partner.phone || '';
+        const partnerEmail = partner.email || '';
+
+        html += `
+          <div class="mt-lg p-lg bg-warning-deep/5 border border-warning/30 rounded-xl relative overflow-hidden">
+            <!-- Security watermark pattern -->
+            <div class="absolute right-xs top-xs text-3xl opacity-10 select-none">🔒</div>
+            <strong class="body-md-strong text-warning-deep block font-bold mb-[4px] select-none">🤝 Secure Pickup Verification</strong>
+            <p class="caption text-body mb-md">Verify the handoff by entering the code or sharing it with the donor during pickup.</p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-md bg-canvas border border-warning/20 p-md rounded-xl shadow-inner mb-lg">
+              <div class="flex flex-col">
+                <span class="caption text-mute font-bold uppercase tracking-wider text-[9px] mb-[2px] select-none">Verification Voucher</span>
+                <span class="font-mono font-black text-2xl text-ink tracking-widest leading-none">${claimObj.handshakeCode}</span>
+              </div>
+              <span class="bg-primary-pale text-positive-deep border border-primary/20 px-md py-xs rounded-full font-bold text-[10px] select-none shadow-xs uppercase tracking-wide">Ready for Pickup</span>
+            </div>
+            
+            <div class="flex gap-sm">
+              <input type="text" id="otpEntry" class="bg-canvas text-ink border border-ink/20 rounded-xl px-md py-md body-sm font-mono w-full max-w-[140px] uppercase text-center focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all text-base" placeholder="FB-…" autocomplete="off" spellcheck="false">
+              <button class="bg-primary text-on-primary hover:bg-primary-active transition-all py-md px-lg rounded-xl font-bold text-sm cursor-pointer shadow-md shadow-primary/10 flex-1 flex items-center justify-center gap-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick="completeVerification('${food._id}', document.getElementById('otpEntry').value.trim().toUpperCase())">
+                Confirm Handshake 🤝
+              </button>
+            </div>
+
+            <button class="w-full mt-md bg-canvas-soft border border-ink/10 text-ink hover:bg-primary-pale transition-all py-md rounded-xl font-bold text-xs cursor-pointer flex items-center justify-center gap-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" onclick="openChatFromDetails('${claimObj.orderId}', '${partnerName.replace(/'/g, "\\'")}', '${(food.name || 'Food').replace(/'/g, "\\'")}', '${partnerPhone}', '${partnerEmail}')">
+              💬 Open Pickup Chat & Coordinate
+            </button>
+          </div>
+        `;
+      }
+
+      document.getElementById('foodModalContent').innerHTML = html;
+      document.getElementById('foodModal').style.display = 'flex';
+      document.getElementById('foodModal').classList.remove('hidden');
+    };
+
+    function updatePickupPreview() {
+      const latitudeValue = document.getElementById('pickupLatitude').value;
+      const longitudeValue = document.getElementById('pickupLongitude').value;
+      const preview = document.getElementById('pickupPreview');
+
+      if (!latitudeValue || !longitudeValue) {
+        preview.textContent = 'Pickup address sentence will be auto-generated from these coordinates when you post.';
+        return;
+      }
+
+      preview.textContent = `Pickup location sentence preview: Pickup is available at coordinates (${latitudeValue}, ${longitudeValue}).`;
+    }
+
+    window.fillCurrentCoordinates = function() {
+      if (!navigator.geolocation) {
+        showMsg('✗ Geolocation is not supported on this browser', 'error', 'postMsg');
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const latitude = Number(position.coords.latitude.toFixed(6));
+          const longitude = Number(position.coords.longitude.toFixed(6));
+          document.getElementById('pickupLatitude').value = latitude;
+          document.getElementById('pickupLongitude').value = longitude;
+          updatePickupPreview();
+        },
+        () => {
+          showMsg('✗ Could not fetch current location. Please enter coordinates manually.', 'error', 'postMsg');
+        }
+      );
+    };
+
+    document.getElementById('pickupLatitude').addEventListener('input', updatePickupPreview);
+    document.getElementById('pickupLongitude').addEventListener('input', updatePickupPreview);
+
+    // CHAT SYSTEM CLIENT-SIDE LOGIC
+    async function loadChatsList() {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      const userType = localStorage.getItem('userType') || '';
+      const isNGO = userType.toLowerCase().includes('ngo');
+
+      if (!token || !userId) return;
+
+      const container = document.getElementById('chatsListContainer');
+      if (!container) return;
+
+      try {
+        let res;
+        if (isNGO) {
+          res = await apiFetch(`/orders/ngo/${userId}`);
+        } else {
+          res = await apiFetch(`/orders/restaurant/${userId}`);
+        }
+
+        const orders = await parseJsonResponse(res);
+        if (!res.ok || !Array.isArray(orders)) {
+          throw new Error('Chats list request failed');
+        }
+
+        const validOrders = orders.filter(order => order.food);
+        document.getElementById('chatCount').textContent = validOrders.length;
+
+        if (validOrders.length === 0) {
+          container.innerHTML = '<div class="text-center text-mute py-xl font-semibold select-none">No active donation claims or conversations found.</div>';
+          return;
+        }
+
+        container.innerHTML = validOrders.map(order => {
+          const isPending = order.status === 'pending';
+          const partner = isNGO 
+            ? (order.food.postedBy || {})
+            : (typeof order.ngo === 'object' ? order.ngo : {});
+          
+          const partnerName = partner.orgName || 'Unknown';
+          const partnerType = partner.userType || (isNGO ? 'restaurant' : 'ngo');
+          const partnerLabel = partnerName === 'Unknown' 
+            ? `Unknown ${partnerType.charAt(0).toUpperCase() + partnerType.slice(1)}`
+            : partnerName;
+          const foodName = order.food.name || 'Unknown Food';
+          const safePartnerName = partnerLabel.replace(/'/g, "\\'");
+          const safeFoodName = foodName.replace(/'/g, "\\'");
+          const partnerPhone = partner.phone || '';
+          const partnerEmail = partner.email || '';
+
+          const isSelected = activeOrderId === order._id;
+          const bgClass = isSelected 
+            ? 'bg-primary/10 border-primary/40' 
+            : 'bg-canvas hover:bg-canvas-soft border-ink/5';
+
+          const statusBadge = isPending 
+            ? `<span class="bg-warning-deep/15 text-warning-deep border border-warning/20 px-sm py-[2px] rounded-full text-[10px] font-bold">Pending Pickup</span>`
+            : `<span class="bg-primary-pale text-positive-deep border border-primary/25 px-sm py-[2px] rounded-full text-[10px] font-bold">Completed</span>`;
+
+          return `
+            <div class="p-md rounded-xl border cursor-pointer transition-all ${bgClass} flex flex-col gap-xs select-none" onclick="window.openChatRoom('${order._id}', '${safePartnerName}', '${safeFoodName}', '${partnerPhone}', '${partnerEmail}')">
+              <div class="flex justify-between items-start gap-sm">
+                <strong class="body-sm-strong text-ink font-bold truncate flex-1">${partnerLabel}</strong>
+                ${statusBadge}
+              </div>
+              <div class="caption text-mute text-[12px] truncate">Food: ${foodName}</div>
+              <div class="flex justify-between items-center text-[10px] text-mute mt-[2px] font-semibold">
+                <span>Handshake: ${order.handshakeCode}</span>
+                <span class="tabular-nums">${new Date(order.createdAt).toLocaleDateString()}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.log('Error loading chats list:', err);
+        container.innerHTML = '<div class="text-center text-negative py-xl font-semibold">Failed to load conversations.</div>';
+      }
+    }
+
+    window.openChatRoom = async function(orderId, partnerName, foodTitle, phone, email) {
+      if (activeChatPollInterval) {
+        clearInterval(activeChatPollInterval);
+      }
+
+      activeOrderId = orderId;
+      loadChatsList();
+
+      document.getElementById('chatPartnerName').textContent = partnerName;
+      document.getElementById('chatFoodTitle').textContent = `Coordination: ${foodTitle}`;
+      
+      const phoneBtn = document.getElementById('chatPartnerPhone');
+      if (phone) {
+        phoneBtn.href = `tel:${phone}`;
+        phoneBtn.style.display = 'flex';
+      } else {
+        phoneBtn.style.display = 'none';
+      }
+
+      const emailBtn = document.getElementById('chatPartnerEmail');
+      if (email) {
+        emailBtn.href = `mailto:${email}`;
+        emailBtn.style.display = 'flex';
+      } else {
+        emailBtn.style.display = 'none';
+      }
+
+      document.getElementById('chatRoomEmptyState').style.display = 'none';
+      document.getElementById('chatRoomActiveState').classList.remove('hidden');
+      document.getElementById('chatRoomActiveState').style.display = 'flex';
+
+      await fetchMessages(orderId);
+
+      activeChatPollInterval = setInterval(() => {
+        fetchMessages(orderId, true);
+      }, 3000);
+    };
+
+    let lastFetchedMessageCount = 0;
+
+    async function fetchMessages(orderId, isPoll = false) {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      if (!token || !userId) return;
+
+      try {
+        const res = await apiFetch(`/messages/${orderId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const messages = await parseJsonResponse(res);
+
+        if (!res.ok || !Array.isArray(messages)) return;
+
+        if (isPoll && messages.length === lastFetchedMessageCount) {
+          return;
+        }
+
+        lastFetchedMessageCount = messages.length;
+        const historyContainer = document.getElementById('chatHistoryContainer');
+        if (!historyContainer) return;
+
+        if (messages.length === 0) {
+          historyContainer.innerHTML = `
+            <div class="flex-1 flex flex-col items-center justify-center text-center p-lg select-none text-mute">
+              <span class="text-3xl mb-xs">🤝</span>
+              <p class="body-sm font-semibold">No messages yet.</p>
+              <p class="caption">Send a message to coordinate pickup details, timing, or coordinates.</p>
+            </div>
+          `;
+          return;
+        }
+
+        historyContainer.innerHTML = messages.map(msg => {
+          const isMe = msg.sender && (msg.sender._id === userId || msg.sender === userId);
+          
+          const bubbleBg = isMe 
+            ? 'bg-primary text-on-primary rounded-tr-none' 
+            : 'bg-canvas border border-ink/5 text-ink rounded-tl-none';
+          
+          const alignClass = isMe ? 'items-end' : 'items-start';
+          
+          const timeStr = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const senderOrgName = msg.sender?.orgName || '';
+          const senderType = msg.sender?.userType || '';
+          const senderLabel = senderOrgName 
+            ? `${senderOrgName}${senderType ? ` (${senderType})` : ''}`
+            : senderType 
+              ? `${senderType.charAt(0).toUpperCase() + senderType.slice(1)} User`
+              : 'User';
+          const msgId = msg._id;
+
+          const deleteBtn = isMe ? `
+            <button class="delete-msg-btn opacity-0 group-hover:opacity-100 transition-opacity text-mute hover:text-negative text-[10px] font-bold cursor-pointer" data-msg-id="${msgId}" onclick="window.deleteMessage('${msgId}')" title="Delete message">✕</button>
+          ` : '';
+
+          return `
+            <div class="flex flex-col gap-[3px] max-w-[85%] ${isMe ? 'self-end' : 'self-start'} ${alignClass} group">
+              <div class="caption text-[10px] text-mute font-bold px-xxs select-none flex items-center gap-xs">${senderLabel}${deleteBtn}</div>
+              <div class="${bubbleBg} px-md py-sm rounded-2xl shadow-sm text-sm break-words leading-relaxed">${msg.text}</div>
+              <div class="caption text-[9px] text-mute font-semibold px-xxs tabular-nums select-none">${timeStr}</div>
+            </div>
+          `;
+        }).join('');
+
+        historyContainer.scrollTop = historyContainer.scrollHeight;
+      } catch (err) {
+        console.log('Error fetching messages:', err);
+      }
+    }
+
+    window.deleteMessage = async function(messageId) {
+      const token = localStorage.getItem('token');
+      if (!token || !messageId) return;
+
+      try {
+        const res = await apiFetch(`/messages/${messageId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok && activeOrderId) {
+          await fetchMessages(activeOrderId);
+        }
+      } catch (err) {
+        console.log('Error deleting message:', err);
+      }
+    };
+
+    window.openChatFromDetails = function(orderId, partnerName, foodTitle, phone, email) {
+      closeFoodModal();
+      switchTab('chats');
+      window.openChatRoom(orderId, partnerName, foodTitle, phone, email);
+    };
+
+    window.addEventListener('load', () => {
+      // Chat message sender listener
+      const chatForm = document.getElementById('chatSendForm');
+      if (chatForm) {
+        chatForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const token = localStorage.getItem('token');
+          const input = document.getElementById('chatMessageInput');
+          const text = input.value.trim();
+          
+          if (!text || !activeOrderId || !token) return;
+
+          input.value = '';
+          input.disabled = true;
+
+          try {
+            const res = await apiFetch(`/messages/${activeOrderId}`, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+              },
+              body: JSON.stringify({ text })
+            });
+
+            if (res.ok) {
+              await fetchMessages(activeOrderId);
+            } else {
+              console.error('Failed to send message');
+              input.value = text;
+            }
+          } catch (err) {
+            console.error('Error sending message:', err);
+            input.value = text;
+          } finally {
+            input.disabled = false;
+            input.focus();
+          }
+        });
+      }
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      const userType = localStorage.getItem('userType') || '';
+
+      if (!token) {
+        window.location.href = '/';
+        return;
+      }
+
+      const isNGO = userType.toLowerCase().includes('ngo');
+
+      // Set user info
+      document.getElementById('userName').textContent = userType || 'User';
+      document.getElementById('userType').textContent = isNGO ? 'NGO / Charitable Recipient' : 'Restaurant / Donor';
+      document.getElementById('userAvatar').textContent = userType ? userType.charAt(0).toUpperCase() : 'U';
+
+      // Hide sections for NGO
+      if (isNGO) {
+        document.getElementById('nav-post').style.display = 'none';
+        document.getElementById('post').style.display = 'none';
+        document.getElementById('nav-myposts').style.display = 'none';
+        document.getElementById('myposts').style.display = 'none';
+        
+        document.getElementById('orgNameLabel').textContent = 'NGO / Charity Name';
+        document.getElementById('orgNameEditLabel').textContent = 'NGO / Charity Name *';
+        document.getElementById('metricMyPostsLabel').textContent = 'Live Claims List';
+        
+        // Count claims dynamically
+        document.getElementById('metricMyPosts').textContent = Object.keys(localClaims).length;
+      }
+
+      loadProfileData();
+      loadBrowseFood();
+      loadHistory();
+      if (!isNGO) loadMyPosts();
+      autoRemoveExpiredFood();
+      setInterval(autoRemoveExpiredFood, 60000); // Check every minute
+      renderApiBadge();
+    });
+  </script>
+</Layout>

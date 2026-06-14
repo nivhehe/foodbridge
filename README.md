@@ -1,6 +1,6 @@
 # FoodBridge — Eliminate Food Waste, Feed Communities
 
-FoodBridge is a full-stack web application that connects local food businesses (restaurants, caterers) with NGOs and community shelters to redistribute surplus food in real time.
+FoodBridge is a real-time web platform connecting local food businesses (restaurants, caterers) with NGOs and shelters to safely coordinate surplus food donation, reduce landfill waste, and support local communities. Built with Astro, Tailwind CSS v4, Node.js, Express, and MongoDB.
 
 ## Features
 
@@ -16,11 +16,11 @@ FoodBridge is a full-stack web application that connects local food businesses (
 
 ## Tech Stack
 
-- **Frontend:** HTML5, Vanilla CSS (glassmorphism, custom properties), responsive layout
-- **Backend:** Node.js, Express.js (REST API)
+- **Frontend:** Astro, Tailwind CSS v4, custom glassmorphism, responsive layout (located in [callous-corot](file:///Users/nivedmohan/Documents/food%20bridge%20copy/callous-corot))
+- **Backend:** Node.js, Express.js (REST API) (located in [foodbridge-backend](file:///Users/nivedmohan/Documents/food%20bridge%20copy/foodbridge-backend))
 - **Database:** MongoDB + Mongoose ODM
 - **Auth:** JWT + bcryptjs
-- **Deployment:** Render (backend), Vercel (frontend)
+- **Deployment:** Render (backend), Cloudflare Pages (frontend)
 
 ## Models
 

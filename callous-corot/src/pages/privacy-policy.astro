@@ -1,0 +1,141 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout 
+  title="Privacy Policy - FoodBridge"
+  description="Read the FoodBridge Privacy Policy to understand how we collect, use, and protect your information when using our food redistribution platform."
+>
+  <div class="max-w-[1240px] mx-auto px-lg py-md md:py-xl">
+    
+    <!-- Sticky Top Navigation -->
+    <header class="sticky top-md z-50 flex flex-col md:flex-row items-center justify-between gap-md p-md bg-canvas/80 backdrop-blur-md border border-canvas/20 rounded-2xl md:rounded-full shadow-md mb-xl">
+      <a href="/" class="flex items-center gap-md hover:opacity-90 transition-opacity">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-gradient-to-br from-primary/30 to-accent-orange/30 shadow-inner">
+          🍽️
+        </div>
+        <div>
+          <div class="font-wise-sans font-black text-2xl tracking-tight leading-none text-ink">FoodBridge</div>
+          <div class="text-[10px] text-mute font-semibold uppercase tracking-wider mt-[2px]">Smart Redistribution</div>
+        </div>
+      </a>
+
+      <nav class="flex items-center gap-xs md:gap-md flex-wrap justify-center">
+        <a href="/" class="px-md py-sm rounded-full text-mute hover:text-ink hover:bg-canvas-soft text-sm font-semibold transition-all duration-200">Home</a>
+        <a href="/about" class="px-md py-sm rounded-full text-mute hover:text-ink hover:bg-canvas-soft text-sm font-semibold transition-all duration-200">About Us</a>
+        <a href="/contact" class="px-md py-sm rounded-full text-mute hover:text-ink hover:bg-canvas-soft text-sm font-semibold transition-all duration-200">Contact</a>
+        <a href="/privacy-policy" class="px-md py-sm rounded-full bg-primary text-on-primary text-sm font-semibold transition-all duration-200">Privacy</a>
+        <a href="/terms-conditions" class="px-md py-sm rounded-full text-mute hover:text-ink hover:bg-canvas-soft text-sm font-semibold transition-all duration-200">Terms</a>
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-canvas border border-ink/10 flex items-center justify-center text-ink hover:bg-canvas-soft cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary shrink-0" aria-label="Toggle Dark Mode">
+          <!-- Sun Icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] block dark:hidden"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          <!-- Moon Icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] hidden dark:block"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </button>
+        <a href="/#auth" class="bg-primary text-on-primary hover:bg-primary-active transition-all duration-200 rounded-full px-xl py-sm text-sm font-bold shadow-md">Get Started</a>
+      </nav>
+    </header>
+
+    <!-- Content Panel -->
+    <main class="bg-canvas rounded-xl p-xl md:p-2xl shadow-sm border border-canvas/20 space-y-xl">
+      
+      <div>
+        <span class="inline-flex items-center gap-xs px-md py-xs mb-md rounded-full text-xs font-extrabold text-positive-deep bg-primary-pale border border-primary-neutral/40 tracking-wide uppercase">
+          Legal Statement
+        </span>
+        <h1 class="display-sm text-ink mb-sm tracking-tight">
+          Privacy Policy
+        </h1>
+        <p class="body-sm text-mute">
+          Last Updated: June 11, 2026
+        </p>
+      </div>
+
+      <div class="border-t border-canvas-soft pt-lg space-y-lg text-body">
+        
+        <!-- Section 1 -->
+        <section class="space-y-sm">
+          <h2 class="display-xs text-ink">1. Information We Collect</h2>
+          <p class="body-md">
+            To ensure clear food coordination and safe donor interactions, we collect the following categories of information:
+          </p>
+          <ul class="list-disc pl-lg space-y-xs body-sm">
+            <li><strong>Account Profiles:</strong> Email addresses, password hashes, and active phone numbers provided during registration.</li>
+            <li><strong>Business Metadata:</strong> Restaurant names, business coordinates, food service classifications, and NGO validation status.</li>
+            <li><strong>Logistics Data:</strong> Active surplus food listings, coordinates, expiry details, transaction timestamps, and verification handshakes.</li>
+          </ul>
+        </section>
+
+        <!-- Section 2 -->
+        <section class="space-y-sm">
+          <h2 class="display-xs text-ink">2. How We Use Information</h2>
+          <p class="body-md">
+            The data collected is processed strictly to provide trust coordination and operational safety:
+          </p>
+          <ul class="list-disc pl-lg space-y-xs body-sm">
+            <li>To match active surplus listings with local registered NGOs.</li>
+            <li>To transmit pickup instructions and location maps to claiming parties.</li>
+            <li>To calculate community impact metrics, carbon avoidance figures, and donation counts.</li>
+            <li>To verify donor identity and maintain security measures against platform misuse.</li>
+          </ul>
+        </section>
+
+        <!-- Section 3 -->
+        <section class="space-y-sm">
+          <h2 class="display-xs text-ink">3. Data Sharing & Security</h2>
+          <p class="body-md">
+            We do not sell your personal or organizational information to third-party data brokers. Information is shared only with other verified platform users to facilitate food recovery:
+          </p>
+          <p class="body-sm">
+            NGO profiles and pickup details are shared with donor restaurants when a claim is active. Restaurant addresses are visible to verified NGOs when browsing food listings. We store sensitive information with encrypted hashing algorithms to maintain robust data protection.
+          </p>
+        </section>
+
+        <!-- Section 4 -->
+        <section class="space-y-sm">
+          <h2 class="display-xs text-ink">4. Your Rights & Compliance</h2>
+          <p class="body-md">
+            FoodBridge values your data rights and complies with global best practices in privacy regulation. You have the right to access, edit, or request complete deletion of your account and related historical listings by reaching out to our support channel at <a href="mailto:foodbridge.online@gmail.com" class="text-accent-orange hover:underline font-semibold">foodbridge.online@gmail.com</a>.
+          </p>
+        </section>
+
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-ink text-canvas-soft rounded-xl p-xl md:p-2xl shadow-sm relative overflow-hidden mt-xl">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-xl mb-2xl relative z-10">
+        <div>
+          <h3 class="display-xs text-primary font-black mb-md">FoodBridge</h3>
+          <p class="body-sm text-canvas-soft/70 leading-relaxed max-w-[384px]">
+            Connecting food businesses and NGOs to reduce waste and support local communities.
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-sm">
+          <strong class="body-md-strong text-primary mb-xs">Platform</strong>
+          <a href="/#how-it-works" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">How It Works</a>
+          <a href="/#impact" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Impact</a>
+          <a href="/#auth" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Get Started</a>
+        </div>
+
+        <div class="flex flex-col gap-sm">
+          <strong class="body-md-strong text-primary mb-xs">Company</strong>
+          <a href="/about" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">About Us</a>
+          <a href="/contact" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Contact Us</a>
+          <a href="/privacy-policy" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Privacy Policy</a>
+          <a href="/terms-conditions" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Terms & Conditions</a>
+        </div>
+      </div>
+
+      <div class="border-t border-canvas-soft/10 pt-lg flex flex-col md:flex-row items-center justify-between gap-md relative z-10 text-xs text-canvas-soft/50">
+        <div>© 2026 FoodBridge. Designed to reduce waste and improve food access.</div>
+        <div>Privacy, terms, and support are now visible in the public landing flow.</div>
+      </div>
+      
+      <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-primary/5 blur-2xl pointer-events-none"></div>
+    </footer>
+
+  </div>
+</Layout>

@@ -1,0 +1,209 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout 
+  title="About Us - FoodBridge | Connecting Donors with Communities"
+  description="Learn about FoodBridge's mission to eliminate food waste, feed local communities, and lower carbon emissions through smart surplus food redistribution."
+>
+  <div class="max-w-[1240px] mx-auto px-lg py-md md:py-xl">
+    
+    <!-- Sticky Top Navigation -->
+    <header class="sticky top-md z-50 flex flex-col md:flex-row items-center justify-between gap-md p-md bg-canvas/80 backdrop-blur-md border border-canvas/20 rounded-2xl md:rounded-full shadow-md mb-xl">
+      <a href="/" class="flex items-center gap-md hover:opacity-90 transition-opacity">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-gradient-to-br from-primary/30 to-accent-orange/30 shadow-inner">
+          🍽️
+        </div>
+        <div>
+          <div class="font-wise-sans font-black text-2xl tracking-tight leading-none text-ink">FoodBridge</div>
+          <div class="text-[10px] text-mute font-semibold uppercase tracking-wider mt-[2px]">Smart Redistribution</div>
+        </div>
+      </a>
+
+      <nav class="flex items-center gap-xs md:gap-md flex-wrap justify-center">
+        <a href="/" class="px-md py-sm rounded-full text-mute hover:text-ink hover:bg-canvas-soft text-sm font-semibold transition-all duration-200">Home</a>
+        <a href="/about" class="px-md py-sm rounded-full bg-primary text-on-primary text-sm font-semibold transition-all duration-200">About Us</a>
+        <a href="/contact" class="px-md py-sm rounded-full text-mute hover:text-ink hover:bg-canvas-soft text-sm font-semibold transition-all duration-200">Contact</a>
+        <a href="/privacy-policy" class="px-md py-sm rounded-full text-mute hover:text-ink hover:bg-canvas-soft text-sm font-semibold transition-all duration-200">Privacy</a>
+        <a href="/terms-conditions" class="px-md py-sm rounded-full text-mute hover:text-ink hover:bg-canvas-soft text-sm font-semibold transition-all duration-200">Terms</a>
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-canvas border border-ink/10 flex items-center justify-center text-ink hover:bg-canvas-soft cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary shrink-0" aria-label="Toggle Dark Mode">
+          <!-- Sun Icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] block dark:hidden"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          <!-- Moon Icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] hidden dark:block"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </button>
+        <a href="/#auth" class="bg-primary text-on-primary hover:bg-primary-active transition-all duration-200 rounded-full px-xl py-sm text-sm font-bold shadow-md">Get Started</a>
+      </nav>
+    </header>
+
+    <!-- Main About Content -->
+    <main class="space-y-xl">
+      
+      <!-- Hero Panel: Mission -->
+      <section class="bg-canvas rounded-xl p-xl md:p-2xl shadow-sm border border-canvas/20 relative overflow-hidden">
+        <div class="relative z-10 max-w-[800px]">
+          <span class="inline-flex items-center gap-xs px-md py-xs mb-md rounded-full text-xs font-extrabold text-positive-deep bg-primary-pale border border-primary-neutral/40 tracking-wide uppercase">
+            Our Mission
+          </span>
+          <h1 class="display-lg text-ink mb-md tracking-tight leading-tight">
+            Eliminating food waste. <br/>
+            <span class="text-accent-orange font-black">Feeding local communities.</span>
+          </h1>
+          <p class="body-lg text-body mb-lg leading-relaxed">
+            FoodBridge was founded with a clear objective: to close the gap between surplus edible food and the communities that face food insecurity. Every day, tons of high-quality, fresh food from restaurants, bakeries, and grocers goes to waste simply due to coordination challenges. We provide the digital bridge to make redistribution instant, local, and reliable.
+          </p>
+        </div>
+        <div class="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-gradient-to-br from-primary/10 to-transparent blur-3xl pointer-events-none"></div>
+      </section>
+
+      <!-- Vision & Values -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+        
+        <!-- Core Vision -->
+        <div class="bg-canvas p-xl rounded-xl border border-canvas/20 shadow-sm flex flex-col justify-between">
+          <div>
+            <h2 class="display-xs text-ink mb-md">Our Vision</h2>
+            <p class="body-md text-body mb-md leading-relaxed">
+              We envision a world where no edible food is ever wasted, and no local neighborhood goes hungry. By leveraging real-time logistics and secure community verification, we aim to build a global standard for regional food recovery.
+            </p>
+          </div>
+          <div class="p-lg bg-canvas-soft rounded-xl border border-canvas-soft/40">
+            <strong class="body-md-strong text-ink block mb-xs">Environmental Impact</strong>
+            <span class="body-sm text-body">
+              Redistributing surplus food directly reduces methane emissions from landfills, making food recovery one of the most effective ways to combat climate change.
+            </span>
+          </div>
+        </div>
+
+        <!-- Core Values -->
+        <div class="bg-canvas p-xl rounded-xl border border-canvas/20 shadow-sm space-y-md">
+          <h2 class="display-xs text-ink">Core Values</h2>
+          
+          <div class="flex items-start gap-md p-md bg-canvas-soft/50 rounded-xl">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-primary-pale text-positive-deep font-bold text-sm shrink-0">
+              🤝
+            </div>
+            <div>
+              <strong class="body-md-strong text-ink block">Direct Coordination</strong>
+              <p class="body-sm text-mute">We remove the middleman, facilitating instant connections between local donors and nearby NGOs.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-md p-md bg-canvas-soft/50 rounded-xl">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-primary-pale text-positive-deep font-bold text-sm shrink-0">
+              ⚡
+            </div>
+            <div>
+              <strong class="body-md-strong text-ink block">Actionable Simplicity</strong>
+              <p class="body-sm text-mute">We focus purely on the details that make pickups successful: location coordinates, expiry windows, and quantities.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-md p-md bg-canvas-soft/50 rounded-xl">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-primary-pale text-positive-deep font-bold text-sm shrink-0">
+              🛡️
+            </div>
+            <div>
+              <strong class="body-md-strong text-ink block">Trust & Respect</strong>
+              <p class="body-sm text-mute">We respect our donors' food standards and our NGOs' resource limitations by enforcing secure handshake verification.</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Platform Statistics & Gamified Impact -->
+      <section class="bg-canvas rounded-xl p-xl md:p-2xl shadow-sm border border-canvas/20">
+        <div class="text-center max-w-[640px] mx-auto mb-xl">
+          <span class="text-xs font-extrabold text-primary-neutral bg-ink inline-block px-md py-xs rounded-full uppercase tracking-wider mb-xs">
+            FoodBridge Impact
+          </span>
+          <h2 class="display-sm text-ink tracking-tight">
+            Redistributing surplus at scale
+          </h2>
+          <p class="body-sm text-mute mt-xs">
+            Through real-time claims and verification, our members coordinate pickups smoothly. Here is a look at what our network achieves.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
+          <div class="bg-canvas-soft p-lg rounded-xl text-center border border-canvas-soft/40 shadow-xs">
+            <div class="display-sm text-primary font-black mb-xs">92%</div>
+            <strong class="body-md-strong text-ink block mb-[2px]">Redistribution Rate</strong>
+            <p class="body-sm text-mute">of posted surplus food is claimed and picked up by local NGOs.</p>
+          </div>
+
+          <div class="bg-canvas-soft p-lg rounded-xl text-center border border-canvas-soft/40 shadow-xs">
+            <div class="display-sm text-primary font-black mb-xs">&lt; 4 hr</div>
+            <strong class="body-md-strong text-ink block mb-[2px]">Average Turnaround</strong>
+            <p class="body-sm text-mute">from initially posting a surplus batch to the physical pickup.</p>
+          </div>
+
+          <div class="bg-canvas-soft p-lg rounded-xl text-center border border-canvas-soft/40 shadow-xs">
+            <div class="display-sm text-primary font-black mb-xs">4,800+</div>
+            <strong class="body-md-strong text-ink block mb-[2px]">Active NGOs</strong>
+            <p class="body-sm text-mute">coordinating food rescue drives across major city centers.</p>
+          </div>
+
+          <div class="bg-canvas-soft p-lg rounded-xl text-center border border-canvas-soft/40 shadow-xs">
+            <div class="display-sm text-primary font-black mb-xs">3.2M kg</div>
+            <strong class="body-md-strong text-ink block mb-[2px]">CO₂ Prevented</strong>
+            <p class="body-sm text-mute">by diverting organic waste away from neighborhood landfills.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA Section -->
+      <section class="bg-ink text-primary-pale rounded-xl p-xl md:p-2xl shadow-md border border-ink/40 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-xl">
+        <div class="relative z-10 max-w-[600px]">
+          <h2 class="display-xs text-primary font-black mb-xs">Ready to join the food recovery network?</h2>
+          <p class="body-sm text-canvas-soft/80 leading-relaxed">
+            Whether you are a restaurant owner looking to reduce waste, or an NGO team working to support your neighborhood, FoodBridge makes coordination straightforward.
+          </p>
+        </div>
+        <div class="relative z-10 shrink-0">
+          <a href="/#auth" class="bg-primary text-on-primary hover:bg-primary-active transition-all duration-200 rounded-xl px-xl py-md text-base font-bold shadow-md inline-block">
+            Get Started Now
+          </a>
+        </div>
+        <div class="absolute -right-20 -bottom-20 w-64 h-64 rounded-full bg-primary/5 blur-2xl pointer-events-none"></div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-ink text-canvas-soft rounded-xl p-xl md:p-2xl shadow-sm relative overflow-hidden mt-xl">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-xl mb-2xl relative z-10">
+        <div>
+          <h3 class="display-xs text-primary font-black mb-md">FoodBridge</h3>
+          <p class="body-sm text-canvas-soft/70 leading-relaxed max-w-[384px]">
+            Connecting food businesses and NGOs to reduce waste and support local communities.
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-sm">
+          <strong class="body-md-strong text-primary mb-xs">Platform</strong>
+          <a href="/#how-it-works" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">How It Works</a>
+          <a href="/#impact" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Impact</a>
+          <a href="/#auth" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Get Started</a>
+        </div>
+
+        <div class="flex flex-col gap-sm">
+          <strong class="body-md-strong text-primary mb-xs">Company</strong>
+          <a href="/about" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">About Us</a>
+          <a href="/contact" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Contact Us</a>
+          <a href="/privacy-policy" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Privacy Policy</a>
+          <a href="/terms-conditions" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Terms & Conditions</a>
+        </div>
+      </div>
+
+      <div class="border-t border-canvas-soft/10 pt-lg flex flex-col md:flex-row items-center justify-between gap-md relative z-10 text-xs text-canvas-soft/50">
+        <div>© 2026 FoodBridge. Designed to reduce waste and improve food access.</div>
+        <div>Privacy, terms, and support are now visible in the public landing flow.</div>
+      </div>
+      
+      <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-primary/5 blur-2xl pointer-events-none"></div>
+    </footer>
+
+  </div>
+</Layout>

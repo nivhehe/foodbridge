@@ -1,0 +1,640 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="FoodBridge - Eliminate Food Waste, Feed Communities">
+  <div class="max-w-[1240px] mx-auto px-lg py-md md:py-xl">
+    
+    <!-- Sticky Top Navigation -->
+    <header class="sticky top-md z-50 flex flex-col md:flex-row items-center justify-between gap-md p-md bg-canvas/80 backdrop-blur-md border border-canvas/20 rounded-2xl md:rounded-full shadow-md mb-xl">
+      <div class="flex items-center gap-md">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-gradient-to-br from-primary/30 to-accent-orange/30 shadow-inner">
+          🍽️
+        </div>
+        <div>
+          <div class="font-wise-sans font-black text-2xl tracking-tight leading-none text-ink">FoodBridge</div>
+          <div class="text-[10px] text-mute font-semibold uppercase tracking-wider mt-[2px]">Smart Redistribution</div>
+        </div>
+      </div>
+
+      <nav class="flex items-center gap-xs md:gap-md flex-wrap justify-center">
+        <a href="#how-it-works" class="px-md py-sm rounded-full text-mute hover:text-ink hover:bg-canvas-soft text-sm font-semibold transition-all duration-200">How It Works</a>
+        <a href="#impact" class="px-md py-sm rounded-full text-mute hover:text-ink hover:bg-canvas-soft text-sm font-semibold transition-all duration-200">Impact</a>
+        <a href="/about" class="px-md py-sm rounded-full text-mute hover:text-ink hover:bg-canvas-soft text-sm font-semibold transition-all duration-200">About Us</a>
+        <a href="/contact" class="px-md py-sm rounded-full text-mute hover:text-ink hover:bg-canvas-soft text-sm font-semibold transition-all duration-200">Contact</a>
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-canvas border border-ink/10 flex items-center justify-center text-ink hover:bg-canvas-soft cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary shrink-0" aria-label="Toggle Dark Mode">
+          <!-- Sun Icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] block dark:hidden"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          <!-- Moon Icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] hidden dark:block"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </button>
+        <a href="#auth" class="bg-primary text-on-primary hover:bg-primary-active transition-all duration-200 rounded-full px-xl py-sm text-sm font-bold shadow-md">Get Started</a>
+      </nav>
+    </header>
+
+    <!-- Hero and Auth Grid -->
+    <section class="grid grid-cols-1 lg:grid-cols-[1.12fr_0.88fr] gap-xl items-stretch mb-2xl">
+      
+      <!-- Left: Hero Brand Panel -->
+      <div class="bg-canvas rounded-xl p-xl md:p-2xl shadow-sm relative overflow-hidden flex flex-col justify-between border border-canvas/20">
+        <div class="relative z-10">
+          <div class="inline-flex items-center gap-xs px-md py-xs mb-md rounded-full text-xs font-extrabold text-positive-deep bg-primary-pale border border-primary-neutral/40 tracking-wide uppercase">
+            <span>●</span> Real-time surplus food coordination
+          </div>
+          
+          <h1 class="display-xl text-ink mb-md tracking-tight leading-none">
+            Turn extra meals into <span class="text-accent-orange font-black">meaningful local impact</span>.
+          </h1>
+          
+          <p class="body-lg text-body mb-xl max-w-[672px] leading-relaxed">
+            FoodBridge connects food businesses with local NGOs to quickly and safely redirect surplus meals to communities in need.
+          </p>
+
+          <div class="flex flex-wrap gap-md mb-2xl">
+            <a href="#auth" class="bg-primary text-on-primary hover:bg-primary-active transition-all duration-200 rounded-xl px-xl py-md text-base font-bold shadow-sm inline-flex items-center gap-sm">
+              Create an Account
+            </a>
+            <a href="#how-it-works" class="bg-canvas-soft text-ink hover:bg-primary-pale transition-all duration-200 rounded-xl px-xl py-md text-base font-bold border border-transparent inline-flex items-center gap-sm">
+              See How It Works
+            </a>
+          </div>
+        </div>
+
+        <!-- Hero Feature Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-md relative z-10 mt-xl">
+          <div class="bg-canvas/50 border border-canvas-soft backdrop-blur-md p-lg rounded-xl shadow-xs hover:border-primary/40 hover:shadow-md hover:scale-[1.01] transition-[border-color,box-shadow,transform] duration-200 flex items-start gap-md">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-primary/15 to-primary/30 text-ink-deep border border-primary/20 shrink-0">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <div>
+              <strong class="body-md-strong text-ink block mb-[2px]">Fast donation posting</strong>
+              <p class="body-sm text-mute">Share quantity, expiry window, and pickup location in a few clicks.</p>
+            </div>
+          </div>
+          <div class="bg-canvas/50 border border-canvas-soft backdrop-blur-md p-lg rounded-xl shadow-xs hover:border-accent-cyan/40 hover:shadow-md hover:scale-[1.01] transition-[border-color,box-shadow,transform] duration-200 flex items-start gap-md">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-accent-cyan/15 to-accent-cyan/30 text-[#0369a1] border border-accent-cyan/20 shrink-0">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </div>
+            <div>
+              <strong class="body-md-strong text-ink block mb-[2px]">Clear NGO discovery</strong>
+              <p class="body-sm text-mute">Make live listings easier to browse and act on without unnecessary back-and-forth.</p>
+            </div>
+          </div>
+          <div class="bg-canvas/50 border border-canvas-soft backdrop-blur-md p-lg rounded-xl shadow-xs hover:border-accent-orange/40 hover:shadow-md hover:scale-[1.01] transition-[border-color,box-shadow,transform] duration-200 flex items-start gap-md">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-accent-orange/15 to-accent-orange/30 text-negative-deep border border-accent-orange/20 shrink-0">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            </div>
+            <div>
+              <strong class="body-md-strong text-ink block mb-[2px]">Better food recovery</strong>
+              <p class="body-sm text-mute">Reduce landfill waste while helping communities access usable food faster.</p>
+            </div>
+          </div>
+          <div class="bg-canvas/50 border border-canvas-soft backdrop-blur-md p-lg rounded-xl shadow-xs hover:border-primary-neutral/40 hover:shadow-md hover:scale-[1.01] transition-[border-color,box-shadow,transform] duration-200 flex items-start gap-md">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-primary-neutral/20 to-primary-neutral/45 text-[#c2410c] border border-primary-neutral/30 shrink-0">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div>
+              <strong class="body-md-strong text-ink block mb-[2px]">Built for local trust</strong>
+              <p class="body-sm text-mute">Designed to support responsible sharing between organizations with real pickup details.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Decorative background elements -->
+        <div class="absolute -right-20 -bottom-20 w-64 h-64 rounded-full bg-gradient-to-br from-accent-orange/10 to-transparent blur-2xl pointer-events-none"></div>
+      </div>
+
+      <!-- Right: Join the Network Card (Auth Panel) -->
+      <aside class="bg-canvas rounded-xl shadow-sm border border-canvas/20 flex flex-col overflow-hidden" id="auth">
+        <div class="p-xl text-canvas bg-ink relative overflow-hidden">
+          <h2 class="display-xs text-primary font-black mb-xs">Join the network</h2>
+          <p class="body-sm text-canvas-soft/80 leading-relaxed">
+            Sign in if you already work with FoodBridge, or create an account to start posting and coordinating pickups.
+          </p>
+          <div class="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-primary/10 blur-xl pointer-events-none"></div>
+        </div>
+
+        <div class="p-xl flex-1 flex flex-col justify-between gap-lg">
+          <!-- Trust signals -->
+          <div class="grid grid-cols-3 gap-xs">
+            <div class="p-xs bg-canvas-soft text-[10px] md:text-xs font-bold text-center text-mute rounded-md border border-canvas-soft/40">Live updates</div>
+            <div class="p-xs bg-canvas-soft text-[10px] md:text-xs font-bold text-center text-mute rounded-md border border-canvas-soft/40">Dual Access</div>
+            <div class="p-xs bg-canvas-soft text-[10px] md:text-xs font-bold text-center text-mute rounded-md border border-canvas-soft/40">Active Flow</div>
+          </div>
+
+          <!-- Auth Form Switcher -->
+          <div class="bg-canvas-soft p-xs rounded-xl grid grid-cols-2 gap-xs">
+            <button id="loginTab" class="py-sm px-md text-sm font-bold text-center rounded-lg bg-canvas text-ink shadow-xs transition-all duration-200 cursor-pointer" onclick="showForm('login')">
+              Login
+            </button>
+            <button id="registerTab" class="py-sm px-md text-sm font-bold text-center rounded-lg text-mute hover:text-ink transition-all duration-200 cursor-pointer" onclick="showForm('register')">
+              Register
+            </button>
+          </div>
+
+          <!-- Message Alert Container -->
+          <div id="message" class="hidden p-md rounded-xl text-sm font-bold leading-relaxed transition-all duration-200"></div>
+
+          <!-- Login Form -->
+          <form id="loginForm" class="flex flex-col gap-md">
+            <div class="flex flex-col gap-xs">
+              <label for="loginEmailOrPhone" class="body-sm-strong text-ink">Email or Phone</label>
+              <input type="text" id="loginEmailOrPhone" class="bg-canvas text-ink border border-ink/20 rounded-md p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200" placeholder="your.email@example.com" required />
+            </div>
+
+            <div class="flex flex-col gap-xs">
+              <label for="loginPassword" class="body-sm-strong text-ink">Password</label>
+              <input type="password" id="loginPassword" class="bg-canvas text-ink border border-ink/20 rounded-md p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200" placeholder="••••••••" required />
+            </div>
+
+            <button type="submit" class="bg-primary text-on-primary hover:bg-primary-active transition-all duration-200 rounded-xl py-md text-base font-bold shadow-sm w-full cursor-pointer mt-sm">
+              Login to Dashboard
+            </button>
+          </form>
+
+          <!-- Register Form -->
+          <form id="registerForm" class="hidden flex flex-col gap-md">
+            <div class="flex flex-col gap-xs">
+              <label for="regEmail" class="body-sm-strong text-ink">Email Address</label>
+              <input type="email" id="regEmail" class="bg-canvas text-ink border border-ink/20 rounded-md p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200" placeholder="your.email@example.com" />
+            </div>
+
+            <div class="flex flex-col gap-xs">
+              <label for="regPhone" class="body-sm-strong text-ink">Phone Number</label>
+              <input type="text" id="regPhone" class="bg-canvas text-ink border border-ink/20 rounded-md p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200" placeholder="+91 XXXXX XXXXX" />
+            </div>
+
+            <div class="flex flex-col gap-xs">
+              <label for="regPassword" class="body-sm-strong text-ink">Password</label>
+              <input type="password" id="regPassword" class="bg-canvas text-ink border border-ink/20 rounded-md p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200" placeholder="Create a strong password" required />
+            </div>
+
+            <div class="flex flex-col gap-xs">
+              <label for="regUserType" class="body-sm-strong text-ink">I am a...</label>
+              <select id="regUserType" class="bg-canvas text-ink border border-ink/20 rounded-md p-md body-md focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200" required>
+                <option value="">Select your type</option>
+                <option value="restaurant">Restaurant / Food Business</option>
+                <option value="ngo">NGO / Community Organization</option>
+              </select>
+            </div>
+
+            <button type="submit" class="bg-primary text-on-primary hover:bg-primary-active transition-all duration-200 rounded-xl py-md text-base font-bold shadow-sm w-full cursor-pointer mt-sm">
+              Create Account
+            </button>
+          </form>
+
+          <div class="grid grid-cols-2 gap-xs text-[10px] text-mute font-semibold">
+            <div class="p-xs text-center border-t border-canvas-soft mt-xs pt-sm">Onboarding in <br>under 2 minutes</div>
+            <div class="p-xs text-center border-t border-canvas-soft mt-xs pt-sm">Direct coordination <br>no middleman</div>
+          </div>
+        </div>
+      </aside>
+
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="bg-canvas rounded-xl p-xl md:p-2xl shadow-sm border border-canvas/20 mb-xl" id="how-it-works">
+      <div class="grid grid-cols-1 md:grid-cols-[1.12fr_0.88fr] gap-xl items-end mb-2xl">
+        <div>
+          <div class="text-xs font-extrabold text-primary-neutral bg-ink inline-block px-md py-xs rounded-full uppercase tracking-wider mb-xs">
+            How It Works
+          </div>
+          <h2 class="display-md text-ink tracking-tight">
+            A clearer flow from surplus food to pickup
+          </h2>
+        </div>
+        <p class="body-lg text-body">
+          FoodBridge is designed to reduce confusion at every step, from posting available food to helping NGOs understand where, when, and how to collect it.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+        <article class="bg-canvas-soft p-xl rounded-xl relative overflow-hidden flex flex-col justify-between h-56 border border-canvas-soft/40 shadow-xs">
+          <div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-lg">
+            1
+          </div>
+          <div>
+            <h3 class="display-xs text-ink mb-xs">Restaurants post surplus</h3>
+            <p class="body-sm text-body">Share the food type, quantity, expiry window, and pickup location so opportunities are visible immediately.</p>
+          </div>
+        </article>
+
+        <article class="bg-canvas-soft p-xl rounded-xl relative overflow-hidden flex flex-col justify-between h-56 border border-canvas-soft/40 shadow-xs">
+          <div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-lg">
+            2
+          </div>
+          <div>
+            <h3 class="display-xs text-ink mb-xs">NGOs review live listings</h3>
+            <p class="body-sm text-body">Browse active posts, understand the pickup details, and focus on the opportunities that fit current needs.</p>
+          </div>
+        </article>
+
+        <article class="bg-canvas-soft p-xl rounded-xl relative overflow-hidden flex flex-col justify-between h-56 border border-canvas-soft/40 shadow-xs">
+          <div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-lg">
+            3
+          </div>
+          <div>
+            <h3 class="display-xs text-ink mb-xs">Communities benefit faster</h3>
+            <p class="body-sm text-body">Good food is redirected quickly, reducing waste while helping more people through a better coordination loop.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Impact & Gamification Section -->
+    <section class="bg-canvas rounded-xl p-xl md:p-2xl shadow-sm border border-canvas/20 mb-xl" id="impact">
+      <div class="grid grid-cols-1 md:grid-cols-[1.12fr_0.88fr] gap-xl items-end mb-2xl">
+        <div>
+          <div class="text-xs font-extrabold text-primary-neutral bg-ink inline-block px-md py-xs rounded-full uppercase tracking-wider mb-xs">
+            Impact
+          </div>
+          <h2 class="display-md text-ink tracking-tight">
+            Built for measurable food recovery
+          </h2>
+        </div>
+        <p class="body-lg text-body">
+          The platform experience now communicates impact more clearly, helping organizations understand the value of participating and returning regularly.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-xl">
+        <div class="bg-canvas-soft p-lg rounded-xl border border-canvas-soft/40 shadow-xs">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+            <div class="bg-canvas p-lg rounded-xl shadow-xs border border-canvas-soft">
+              <div class="display-sm text-primary font-black mb-xs">24/7</div>
+              <div class="body-sm text-body font-semibold">Access for posting and browsing available surplus</div>
+            </div>
+            <div class="bg-canvas p-lg rounded-xl shadow-xs border border-canvas-soft">
+              <div class="display-sm text-primary font-black mb-xs">2</div>
+              <div class="body-sm text-body font-semibold">Core roles supported: restaurants and NGOs</div>
+            </div>
+            <div class="bg-canvas p-lg rounded-xl shadow-xs border border-canvas-soft">
+              <div class="display-sm text-primary font-black mb-xs">Live</div>
+              <div class="body-sm text-body font-semibold">Pickup information shown with active food listings</div>
+            </div>
+            <div class="bg-canvas p-lg rounded-xl shadow-xs border border-canvas-soft">
+              <div class="display-sm text-primary font-black mb-xs">Clear</div>
+              <div class="body-sm text-body font-semibold">Structured forms, account access, and delivery context</div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="bg-ink text-primary-pale p-xl rounded-xl flex flex-col justify-between border border-ink/40 shadow-md relative overflow-hidden">
+          <div>
+            <h3 class="display-xs text-primary font-black mb-md">Why FoodBridge matters</h3>
+            <p class="body-md text-canvas-soft/80 mb-lg leading-relaxed">
+              Professional coordination tools help teams act faster. The more precise the information, the more likely surplus food gets picked up before it expires.
+            </p>
+          </div>
+          <div class="flex flex-col gap-sm">
+            <div class="bg-canvas-soft/10 p-md rounded-xl border border-canvas-soft/10 text-primary-pale body-sm-strong flex items-center gap-md">
+              <span class="text-primary text-lg">✓</span> Reduce edible food going to landfill.
+            </div>
+            <div class="bg-canvas-soft/10 p-md rounded-xl border border-canvas-soft/10 text-primary-pale body-sm-strong flex items-center gap-md">
+              <span class="text-primary text-lg">✓</span> Help NGOs make quicker pickup decisions.
+            </div>
+            <div class="bg-canvas-soft/10 p-md rounded-xl border border-canvas-soft/10 text-primary-pale body-sm-strong flex items-center gap-md">
+              <span class="text-primary text-lg">✓</span> Give restaurants a smoother donation workflow.
+            </div>
+          </div>
+          
+          <div class="absolute -left-20 -bottom-20 w-48 h-48 rounded-full bg-primary/5 blur-xl pointer-events-none"></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- About & Contact Section -->
+    <section class="bg-canvas rounded-xl p-xl md:p-2xl shadow-sm border border-canvas/20 mb-xl" id="about">
+      <div class="grid grid-cols-1 md:grid-cols-[1.12fr_0.88fr] gap-xl items-end mb-2xl">
+        <div>
+          <div class="text-xs font-extrabold text-primary-neutral bg-ink inline-block px-md py-xs rounded-full uppercase tracking-wider mb-xs">
+            About
+          </div>
+          <h2 class="display-md text-ink tracking-tight">
+            A more trustworthy first impression
+          </h2>
+        </div>
+        <p class="body-lg text-body">
+          This homepage is designed to explain the mission, reduce uncertainty for first-time visitors, and guide them naturally into account creation or sign in.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-xl">
+        
+        <!-- About Box -->
+        <div class="bg-canvas-soft p-xl rounded-xl border border-canvas-soft/40 shadow-xs">
+          <h3 class="display-xs text-ink mb-md">About FoodBridge</h3>
+          <p class="body-md text-body mb-lg leading-relaxed">
+            FoodBridge connects food businesses with community organizations in a way that feels more organized, more transparent, and easier to trust. The goal is simple: make food redistribution easier to act on.
+          </p>
+          <div class="flex flex-col gap-md">
+            <div class="bg-canvas p-lg rounded-xl shadow-xs border border-canvas-soft">
+              <strong class="body-md-strong text-ink block mb-[2px]">Mission-led</strong>
+              <span class="body-sm text-body">Reduce food waste while supporting local food access with a better digital workflow.</span>
+            </div>
+            <div class="bg-canvas p-lg rounded-xl shadow-xs border border-canvas-soft">
+              <strong class="body-md-strong text-ink block mb-[2px]">Practical</strong>
+              <span class="body-sm text-body">Focus on the details that make pickup possible: quantity, expiry timing, and location context.</span>
+            </div>
+            <div class="bg-canvas p-lg rounded-xl shadow-xs border border-canvas-soft">
+              <strong class="body-md-strong text-ink block mb-[2px]">Action-oriented</strong>
+              <span class="body-sm text-body">Guide users quickly from interest to posting, browsing, and follow-through.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Box -->
+        <div class="bg-canvas-soft p-xl rounded-xl border border-canvas-soft/40 shadow-xs flex flex-col justify-between" id="contact">
+          <div>
+            <h3 class="display-xs text-ink mb-md">Contact and support</h3>
+            <p class="body-md text-body mb-lg leading-relaxed">
+              Use this section as a professional contact area until a full support workflow is added. It gives visitors a clear place to look for next steps and trust signals.
+            </p>
+          </div>
+          <div class="flex flex-col gap-md">
+            <div class="bg-canvas p-lg rounded-xl shadow-xs border border-canvas-soft flex justify-between items-center">
+              <div>
+                <strong class="body-md-strong text-ink">Email support</strong>
+                <span class="body-sm text-body block">For direct help & inquiries</span>
+              </div>
+              <a href="mailto:foodbridge.online@gmail.com" class="text-sm font-bold text-accent-orange hover:underline">foodbridge.online@gmail.com</a>
+            </div>
+            <div class="bg-canvas p-lg rounded-xl shadow-xs border border-canvas-soft">
+              <strong class="body-md-strong text-ink block mb-[2px]">Response window</strong>
+              <span class="body-sm text-body">Monday to Friday, 9:00 AM to 6:00 PM</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-ink text-canvas-soft rounded-xl p-xl md:p-2xl shadow-sm relative overflow-hidden">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-xl mb-2xl relative z-10">
+        <div>
+          <h3 class="display-xs text-primary font-black mb-md">FoodBridge</h3>
+          <p class="body-sm text-canvas-soft/70 leading-relaxed max-w-[384px]">
+            Connecting food businesses and NGOs to reduce waste and support local communities.
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-sm">
+          <strong class="body-md-strong text-primary mb-xs">Platform</strong>
+          <a href="#how-it-works" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">How It Works</a>
+          <a href="#impact" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Impact</a>
+          <a href="#auth" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Get Started</a>
+        </div>
+
+        <div class="flex flex-col gap-sm">
+          <strong class="body-md-strong text-primary mb-xs">Company</strong>
+          <a href="/about" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">About Us</a>
+          <a href="/contact" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Contact Us</a>
+          <a href="/privacy-policy" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Privacy Policy</a>
+          <a href="/terms-conditions" class="body-sm text-canvas-soft/80 hover:text-primary transition-colors">Terms & Conditions</a>
+        </div>
+      </div>
+
+      <div class="border-t border-canvas-soft/10 pt-lg flex flex-col md:flex-row items-center justify-between gap-md relative z-10 text-xs text-canvas-soft/50">
+        <div>© 2026 FoodBridge. Designed to reduce waste and improve food access.</div>
+        <div>Privacy, terms, and support are now visible in the public landing flow.</div>
+      </div>
+      
+      <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-primary/5 blur-2xl pointer-events-none"></div>
+    </footer>
+
+  </div>
+
+  <!-- Client-Side Form Logic & API Calls -->
+  <script is:inline>
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const messageDiv = document.getElementById('message');
+    
+    const API_STORAGE_KEY = 'foodbridge_api_url';
+    const DEFAULT_REMOTE_API_URL = 'https://foodbridge.online/api';
+
+    function normalizeApiUrl(url) {
+      return String(url || '').trim().replace(/\/+$/, '');
+    }
+
+    function isLocalHost(host) {
+      return /^(127\.0\.0\.1|localhost|0\.0\.0\.0|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})$/.test(host);
+    }
+
+    function getStoredApiUrl() {
+      return normalizeApiUrl(sessionStorage.getItem(API_STORAGE_KEY));
+    }
+
+    function rememberApiUrl(url) {
+      const normalized = normalizeApiUrl(url);
+      if (!normalized) return;
+      sessionStorage.setItem(API_STORAGE_KEY, normalized);
+    }
+
+    function resolveApiBaseUrl() {
+      const fromQuery = new URLSearchParams(window.location.search).get('api');
+      const fromGlobal = window.FOODBRIDGE_API_URL;
+      const rawHost = window.location.hostname || 'localhost';
+      const host = rawHost || 'localhost';
+      const isLocalIp = isLocalHost(host);
+      const isLocal = isLocalIp || window.location.protocol === 'file:';
+      const fallback = isLocal ? `http://${host}:5001/api` : '/api';
+      return normalizeApiUrl(fromQuery || fromGlobal || getStoredApiUrl() || fallback);
+    }
+
+    let API_BASE_URL = resolveApiBaseUrl();
+
+    function getApiCandidates() {
+      const host = window.location.hostname || 'localhost';
+      const isLocal = isLocalHost(host) || window.location.protocol === 'file:';
+      const candidates = [
+        !isLocal ? '/api' : '',
+        normalizeApiUrl(new URLSearchParams(window.location.search).get('api')),
+        normalizeApiUrl(window.FOODBRIDGE_API_URL),
+        getStoredApiUrl(),
+        isLocal ? `http://${host}:5001/api` : '',
+        isLocal ? 'http://localhost:5001/api' : '',
+        isLocal ? 'http://127.0.0.1:5001/api' : '',
+        API_BASE_URL,
+        !isLocal ? DEFAULT_REMOTE_API_URL : ''
+      ].filter(Boolean);
+      return [...new Set(candidates)];
+    }
+
+    function buildApiUrl(base, path) {
+      const normalizedBase = normalizeApiUrl(base);
+      const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+      return `${normalizedBase}${normalizedPath}`;
+    }
+
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 45000) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await fetch(url, { ...options, signal: controller.signal });
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    async function requestWithApiFallback(path, options) {
+      const candidates = getApiCandidates();
+      let lastError = null;
+
+      for (const base of candidates) {
+        try {
+          const response = await fetchWithTimeout(buildApiUrl(base, path), options);
+          const contentType = response.headers.get('content-type') || '';
+          const looksLikeHtml = contentType.includes('text/html');
+          if (response.status === 404 && looksLikeHtml) continue;
+          if (contentType && !contentType.includes('application/json') && !looksLikeHtml) {
+            API_BASE_URL = base;
+            rememberApiUrl(base);
+            return response;
+          }
+          if (looksLikeHtml) continue;
+
+          API_BASE_URL = base;
+          rememberApiUrl(base);
+          return response;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      console.error('API candidates tried:', candidates, 'lastError:', lastError);
+      if (lastError) throw lastError;
+      throw new Error('No reachable API endpoint');
+    }
+
+    window.showForm = function(formType) {
+      if (formType === 'login') {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        loginTab.className = "py-sm px-md text-sm font-bold text-center rounded-lg bg-canvas text-ink shadow-xs transition-all duration-200 cursor-pointer";
+        registerTab.className = "py-sm px-md text-sm font-bold text-center rounded-lg text-mute hover:text-ink transition-all duration-200 cursor-pointer";
+      } else {
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        loginTab.className = "py-sm px-md text-sm font-bold text-center rounded-lg text-mute hover:text-ink transition-all duration-200 cursor-pointer";
+        registerTab.className = "py-sm px-md text-sm font-bold text-center rounded-lg bg-canvas text-ink shadow-xs transition-all duration-200 cursor-pointer";
+      }
+      messageDiv.className = 'hidden';
+    };
+
+    function showMessage(text, type) {
+      messageDiv.textContent = text;
+      messageDiv.className = `p-md rounded-xl text-sm font-bold leading-relaxed transition-all duration-200 ${
+        type === 'success' ? 'bg-primary-pale text-positive-deep border border-positive/20' : 'bg-negative-bg text-negative-darkest! border border-negative/20'
+      }`;
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailOrPhone = document.getElementById('loginEmailOrPhone').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      const submitButton = loginForm.querySelector('button[type="submit"]');
+
+      if (!emailOrPhone || !password) {
+        showMessage('Please fill in all fields', 'error');
+        return;
+      }
+
+      try {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Signing in...';
+
+        const res = await requestWithApiFallback('/auth/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ emailOrPhone, password })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userId', data.userId || '');
+          localStorage.setItem('userType', data.userType || '');
+          rememberApiUrl(API_BASE_URL);
+
+          showMessage('✓ Login successful! Redirecting...', 'success');
+
+          setTimeout(() => {
+            window.location.href = 'dashboard';
+          }, 1200);
+        } else {
+          showMessage(data.message || '✗ Login failed', 'error');
+        }
+      } catch (err) {
+        showMessage(`✗ Unable to reach the backend. Current API: ${API_BASE_URL}`, 'error');
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Login to Dashboard';
+      }
+    });
+
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('regEmail').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+      const userType = document.getElementById('regUserType').value;
+      const submitButton = registerForm.querySelector('button[type="submit"]');
+
+      if (!password || !userType || (!email && !phone)) {
+        showMessage('Please fill all required fields', 'error');
+        return;
+      }
+
+      try {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Creating account...';
+
+        const res = await requestWithApiFallback('/auth/register', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email, phone, password, userType })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          showMessage('✓ Registration successful! Please log in.', 'success');
+          setTimeout(() => {
+            showForm('login');
+            loginForm.reset();
+            registerForm.reset();
+          }, 1400);
+        } else {
+          showMessage(data.message || '✗ Registration failed', 'error');
+        }
+      } catch (err) {
+        showMessage(`✗ Unable to reach the backend. Current API: ${API_BASE_URL}`, 'error');
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Create Account';
+      }
+    });
+
+    window.addEventListener('load', () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        showMessage('Already logged in. Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = 'dashboard';
+        }, 900);
+      }
+    });
+  </script>
+</Layout>

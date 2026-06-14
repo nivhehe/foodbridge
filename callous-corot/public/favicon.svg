@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9fe870" />
+      <stop offset="100%" stop-color="#ffc091" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Rounded background -->
+  <rect width="128" height="128" rx="36" fill="url(#bgGrad)" />
+  
+  <!-- Fork -->
+  <path d="M 24 96 L 24 64" stroke="#0e0f0c" stroke-width="5" stroke-linecap="round" />
+  <path d="M 18 36 L 18 56 C 18 64, 30 64, 30 56 L 30 36" stroke="#0e0f0c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 24 36 L 24 56" stroke="#0e0f0c" stroke-width="5" stroke-linecap="round" />
+  
+  <!-- Plate (Outer Rim & Inner Rim) -->
+  <circle cx="64" cy="64" r="22" stroke="#0e0f0c" stroke-width="5" fill="none" />
+  <circle cx="64" cy="64" r="14" stroke="#0e0f0c" stroke-width="1.5" stroke-dasharray="3 2" opacity="0.6" fill="none" />
+  
+  <!-- Heart in center of plate -->
+  <path d="M 64 76 C 64 76, 52 65, 52 58 C 52 53, 56 49, 64 55 C 72 49, 76 53, 76 58 C 76 65, 64 76, 64 76 Z" fill="#0e0f0c" />
+  
+  <!-- Knife -->
+  <path d="M 104 96 L 104 64" stroke="#0e0f0c" stroke-width="5" stroke-linecap="round" />
+  <path d="M 104 64 C 104 64, 98 61, 98 50 C 98 39, 104 34, 104 34 Z" fill="#0e0f0c" />
+</svg>
